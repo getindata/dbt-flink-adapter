@@ -14,25 +14,20 @@ class SqlGatewayOperation:
         self.operation_handle = operation_handle
 
     @staticmethod
-    def execute_statement(session: SqlGatewaySession, sql: str) -> 'SqlGatewayOperation':
-        statement_request = {
-            "statement": sql
-        }
+    def execute_statement(session: SqlGatewaySession, sql: str) -> "SqlGatewayOperation":
+        statement_request = {"statement": sql}
 
         response = requests.post(
             url=f"${session.session_endpoint_url()}/statements",
             data=json.dumps(statement_request),
             headers={
                 "Content-Type": "application/json",
-            }
+            },
         )
 
         if response.status_code == 200:
             operation_handle = response.json()["operationHandle"]
-            return SqlGatewayOperation(
-                session=session,
-                operation_handle=operation_handle
-            )
+            return SqlGatewayOperation(session=session, operation_handle=operation_handle)
         else:
             raise Exception("SQL gateway error: ", response.status_code)
 

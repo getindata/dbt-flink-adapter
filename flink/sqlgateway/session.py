@@ -14,17 +14,15 @@ class SqlGatewaySession:
         self.session_handle = session_handle
 
     @staticmethod
-    def create(config: SqlGatewayConfig) -> 'SqlGatewaySession':
-        session_request = {
-            "sessionName": config.session_name
-        }
+    def create(config: SqlGatewayConfig) -> "SqlGatewaySession":
+        session_request = {"sessionName": config.session_name}
 
         response = requests.post(
             url=f"${config.gateway_url()}/v1/sessions",
             data=json.dumps(session_request),
             headers={
                 "Content-Type": "application/json",
-            }
+            },
         )
 
         if response.status_code == 200:
@@ -38,9 +36,8 @@ class SqlGatewaySession:
 
     def execute_statement(self, sql: str) -> SqlGatewayOperation:
         if self.session_handle is None:
-            raise Exception(f"Session '${self.config.session_name}' is not created. Call create() method first")
+            raise Exception(
+                f"Session '${self.config.session_name}' is not created. Call create() method first"
+            )
 
-        return SqlGatewayOperation.execute_statement(
-            session=self,
-            sql=sql
-        )
+        return SqlGatewayOperation.execute_statement(session=self, sql=sql)

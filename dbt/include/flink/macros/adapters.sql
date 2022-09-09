@@ -34,7 +34,7 @@ dbt docs: https://docs.getdbt.com/docs/contributing/building-a-new-adapter
      create schema if not exists {{ relation.without_identifier().include(database=False) }}
    {%- endcall -%}
  {% endmacro %}
- 
+
 */
 
 {% macro flink__create_schema(relation) -%}

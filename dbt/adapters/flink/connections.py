@@ -1,12 +1,12 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
-import dbt.exceptions # noqa
+import dbt.exceptions  # noqa
 from dbt.adapters.base import Credentials
 from dbt.adapters.sql import SQLConnectionManager  # type: ignore
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 from dbt.logger import GLOBAL_LOGGER as logger
 
-from flink.sqlgateway.session import SqlGatewaySessionAdapter
+from flink.sqlgateway.session import SqlGatewaySession
 
 
 @dataclass
@@ -22,11 +22,7 @@ class FlinkCredentials(Credentials):
     # username: str
     # password: str
 
-    _ALIASES = {
-        "dbname":"database",
-        "pass":"password",
-        "user":"username"
-    }
+    _ALIASES = {"dbname": "database", "pass": "password", "user": "username"}
 
     @property
     def type(self):
@@ -45,13 +41,13 @@ class FlinkCredentials(Credentials):
         """
         List of keys to display in the `dbt debug` output.
         """
-        return ("host","port","username","user")
+        return ("host", "port", "username", "user")
 
 
 class FlinkConnectionManager(SQLConnectionManager):
     TYPE = "flink"
 
-    session: SqlGatewaySessionAdapter
+    session: SqlGatewaySession
 
     @contextmanager
     def exception_handler(self, sql: str):
@@ -88,11 +84,13 @@ class FlinkConnectionManager(SQLConnectionManager):
 
         credentials = connection.credentials
 
-        session: SqlGatewaySessionAdapter = FlinkSqlGatewayClient.create_session(
+        session: SqlGatewaySession = FlinkSqlGatewayClient.create_session(
             host=credentials.host,
             port=credentials.port,
             session_name=session_name,
         )
+
+        print(f"Session created: {session.session_handle}")
 
         # ## Example ##
         # if connection.state == "open":
@@ -115,7 +113,7 @@ class FlinkConnectionManager(SQLConnectionManager):
         pass
 
     @classmethod
-    def get_response(cls,cursor):
+    def get_response(cls, cursor):
         """
         Gets a cursor object and returns adapter-specific information
         about the last executed command generally a AdapterResponse ojbect

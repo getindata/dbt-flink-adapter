@@ -52,4 +52,3 @@ repos:
     args: [--show-error-codes, --pretty, --ignore-missing-imports]
     files: ^dbt/adapters
     language: system
-
