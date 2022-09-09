@@ -14,9 +14,7 @@ setup(
     author="GetInData",
     author_email="office@getindata.com",
     url="https://github.com/getindata/flink-dbt-adapter",
-    packages=find_namespace_packages(include=["dbt", "dbt.*"]),
+    packages=find_namespace_packages(include=["dbt", "dbt.*", "flink", "flink.*"]),
     include_package_data=True,
-    install_requires=[
-        "dbt-core~=0.0.1.",
-    ],
+    install_requires=["dbt-core~=0.0.1.", "requests~=2.28.1"],
 )

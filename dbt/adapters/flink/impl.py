@@ -1,8 +1,6 @@
-
 from dbt.adapters.base import BaseAdapter as adapter_cls
 
 from dbt.adapters.flink import FlinkConnectionManager
-
 
 
 class FlinkAdapter(adapter_cls):
@@ -19,4 +17,5 @@ class FlinkAdapter(adapter_cls):
         """
         return "datenow()"
 
- # may require more build out to make more user friendly to confer with team and community.
+
+# may require more build out to make more user friendly to confer with team and community.
