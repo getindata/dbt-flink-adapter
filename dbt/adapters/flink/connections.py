@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 import dbt.exceptions # noqa
 from dbt.adapters.base import Credentials
-from dbt.adapters.base import SQLConnectionManager
+from dbt.adapters.sql import SQLConnectionManager  # type: ignore
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 from dbt.logger import GLOBAL_LOGGER as logger
 
