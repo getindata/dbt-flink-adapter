@@ -2,10 +2,12 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 import dbt.exceptions # noqa
 from dbt.adapters.base import Credentials
-
-from dbt.adapters.base import BaseConnectionManager as connection_cls
-
+from dbt.adapters.base import SQLConnectionManager
+from flink.sqlgateway.client import FlinkSqlGatewayClient
 from dbt.logger import GLOBAL_LOGGER as logger
+
+from flink.sqlgateway.session import SqlGatewaySession
+
 
 @dataclass
 class FlinkCredentials(Credentials):
@@ -45,9 +47,12 @@ class FlinkCredentials(Credentials):
         """
         return ("host","port","username","user")
 
-class FlinkConnectionManager(connection_cls):
+
+class FlinkConnectionManager(SQLConnectionManager):
     TYPE = "flink"
 
+    session: SqlGatewaySession
+    flink_client: FlinkSqlGatewayClient = FlinkSqlGatewayClient()
 
     @contextmanager
     def exception_handler(self, sql: str):
@@ -76,6 +81,14 @@ class FlinkConnectionManager(connection_cls):
         Receives a connection object and a Credentials object
         and moves it to the "open" state.
         """
+        if connection.state == "open":
+            logger.debug("Connection is already open, skipping open.")
+            return connection
+
+        credentials = connection.credentials
+
+        session: SqlGatewaySession = cls.flink_client.connect()
+
         # ## Example ##
         # if connection.state == "open":
         #     logger.debug("Connection is already open, skipping open.")
