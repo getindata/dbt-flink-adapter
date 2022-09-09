@@ -1,18 +1,9 @@
 from flink.sqlgateway.session import SqlGatewaySession
-from flink.sqlgateway.statement import SqlGatewayStatement
+from flink.sqlgateway.config import SqlGatewayConfig
 
 
 class FlinkSqlGatewayClient:
-    def __init__(self):
-        pass
-
-    def connect(self) -> SqlGatewaySession:
-        print("Connected...")
-        # TODO connect and get session_id
-        session_handle = "someSessionHandle"
-
-        return SqlGatewaySession(session_handle)
-
-    def execute_statement(self, session: SqlGatewaySession, sql: str) -> SqlGatewayStatement:
-        # TODO execute statement on the session
-        return SqlGatewayStatement("someStatementId")
+    @staticmethod
+    def create_session(host: str, port: int, session_name: str) -> SqlGatewaySession:
+        config = SqlGatewayConfig(host, port, session_name)
+        return SqlGatewaySession.create(config)

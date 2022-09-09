@@ -6,7 +6,7 @@ from dbt.adapters.sql import SQLConnectionManager  # type: ignore
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 from dbt.logger import GLOBAL_LOGGER as logger
 
-from flink.sqlgateway.session import SqlGatewaySession
+from flink.sqlgateway.session import SqlGatewaySessionAdapter
 
 
 @dataclass
@@ -51,8 +51,7 @@ class FlinkCredentials(Credentials):
 class FlinkConnectionManager(SQLConnectionManager):
     TYPE = "flink"
 
-    session: SqlGatewaySession
-    flink_client: FlinkSqlGatewayClient = FlinkSqlGatewayClient()
+    session: SqlGatewaySessionAdapter
 
     @contextmanager
     def exception_handler(self, sql: str):
@@ -85,9 +84,15 @@ class FlinkConnectionManager(SQLConnectionManager):
             logger.debug("Connection is already open, skipping open.")
             return connection
 
+        session_name = "test_session"  # TODO get from config
+
         credentials = connection.credentials
 
-        session: SqlGatewaySession = cls.flink_client.connect()
+        session: SqlGatewaySessionAdapter = FlinkSqlGatewayClient.create_session(
+            host=credentials.host,
+            port=credentials.port,
+            session_name=session_name,
+        )
 
         # ## Example ##
         # if connection.state == "open":
