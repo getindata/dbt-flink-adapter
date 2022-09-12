@@ -1,0 +1,52 @@
+version: '2'
+services:
+  jobmanager:
+    image: ghcr.io/apache/flink-docker:1.16-SNAPSHOT-scala_2.12-java11-debian
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10
+    volumes:
+      - ./opt/flink-sql-connector-kafka-1.16.1.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.1.jar
+
+  taskmanager:
+    image: ghcr.io/apache/flink-docker:1.16-SNAPSHOT-scala_2.12-java11-debian
+    command: taskmanager
+    depends_on:
+      - jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10
+    volumes:
+      - ./opt/flink-sql-connector-kafka-1.16.1.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.1.jar
+
+  sql-gateway:
+    image: ghcr.io/apache/flink-docker:1.16-SNAPSHOT-scala_2.12-java11-debian
+    ports:
+      - "8083:8083"
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        /docker-entrypoint.sh
+        /opt/flink/bin/sql-gateway.sh start-foreground
+    depends_on:
+      - jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager
+        sql-gateway.endpoint.rest.address: 0.0.0.0
+    volumes:
+      - ./opt/flink-sql-connector-kafka-1.16.1.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.1.jar
+
+networks:
+  default:
+    name: flink
