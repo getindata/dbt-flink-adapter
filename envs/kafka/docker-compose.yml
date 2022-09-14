@@ -22,5 +22,4 @@ services:
 
 networks:
   default:
-    external:
-      name: flink
+    name: flink
