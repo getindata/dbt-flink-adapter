@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import json
+from typing import Optional
+
 import requests
 from flink.sqlgateway.session import SqlGatewaySession
 
@@ -34,4 +36,16 @@ class SqlGatewayOperation:
     def statement_endpoint_url(self) -> str:
         return f"${self.session.session_endpoint_url()}/operations/${self.operation_handle}"
 
-    # TODO get results endpoint
+    def get_status(self) -> str:
+        response = requests.get(
+            url=f"${self.statement_endpoint_url()}/status",
+            headers={
+                "Content-Type": "application/json",
+            },
+        )
+
+        if response.status_code == 200:
+            return response.json()["status"]
+        else:
+            raise Exception("SQL gateway error: ", response.status_code)
+
