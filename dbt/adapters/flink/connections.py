@@ -1,12 +1,16 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
+
 import dbt.exceptions  # noqa
 from dbt.adapters.base import Credentials
 from dbt.adapters.sql import SQLConnectionManager  # type: ignore
-from flink.sqlgateway.client import FlinkSqlGatewayClient
-from dbt.logger import GLOBAL_LOGGER as logger
+from dbt.events import AdapterLogger
 
+from dbt.adapters.flink.handler import FlinkHandler, FlinkCursor
+from flink.sqlgateway.client import FlinkSqlGatewayClient
 from flink.sqlgateway.session import SqlGatewaySession
+
+logger = AdapterLogger("Flink")
 
 
 @dataclass
@@ -16,13 +20,11 @@ class FlinkCredentials(Credentials):
     profiles.yml to connect to new adapter
     """
 
-    # Add credentials members here, like:
-    # host: str
-    # port: int
-    # username: str
-    # password: str
+    host: str
+    port: int
+    session_name: str
 
-    _ALIASES = {"dbname": "database", "pass": "password", "user": "username"}
+    _ALIASES = {"session": "session_name"}
 
     @property
     def type(self):
@@ -41,7 +43,7 @@ class FlinkCredentials(Credentials):
         """
         List of keys to display in the `dbt debug` output.
         """
-        return ("host", "port", "username", "user")
+        return "host", "port", "session_name"
 
 
 class FlinkConnectionManager(SQLConnectionManager):
@@ -55,20 +57,11 @@ class FlinkConnectionManager(SQLConnectionManager):
         Returns a context manager, that will handle exceptions raised
         from queries, catch, log, and raise dbt exceptions it knows how to handle.
         """
-        # ## Example ##
-        # try:
-        #     yield
-        # except myadapter_library.DatabaseError as exc:
-        #     self.release(connection_name)
-
-        #     logger.debug("myadapter error: {}".format(str(e)))
-        #     raise dbt.exceptions.DatabaseException(str(exc))
-        # except Exception as exc:
-        #     logger.debug("Error running SQL: {}".format(sql))
-        #     logger.debug("Rolling back transaction.")
-        #     self.release(connection_name)
-        #     raise dbt.exceptions.RuntimeException(str(exc))
-        pass
+        try:
+            yield
+        except Exception as e:
+            logger.error("Exception thrown during execution: {}".format(str(e)))
+            raise dbt.exceptions.RuntimeException(str(e))
 
     @classmethod
     def open(cls, connection):
@@ -80,49 +73,33 @@ class FlinkConnectionManager(SQLConnectionManager):
             logger.debug("Connection is already open, skipping open.")
             return connection
 
-        session_name = "test_session"  # TODO get from config
+        credentials: FlinkCredentials = connection.credentials
+        try:
+            session: SqlGatewaySession = FlinkSqlGatewayClient.create_session(
+                host=credentials.host,
+                port=credentials.port,
+                session_name=credentials.session_name,
+            )
 
-        credentials = connection.credentials
+            connection.state = "open"
+            connection.handle = FlinkHandler(session)
 
-        session: SqlGatewaySession = FlinkSqlGatewayClient.create_session(
-            host=credentials.host,
-            port=credentials.port,
-            session_name=session_name,
-        )
+            logger.info(f"Session created: {session.session_handle}")
+        except Exception as e:
+            logger.error("Error during creating session {}".format(str(e)))
+            raise e
 
-        print(f"Session created: {session.session_handle}")
-
-        # ## Example ##
-        # if connection.state == "open":
-        #     logger.debug("Connection is already open, skipping open.")
-        #     return connection
-
-        # credentials = connection.credentials
-
-        # try:
-        #     handle = myadapter_library.connect(
-        #         host=credentials.host,
-        #         port=credentials.port,
-        #         username=credentials.username,
-        #         password=credentials.password,
-        #         catalog=credentials.database
-        #     )
-        #     connection.state = "open"
-        #     connection.handle = handle
-        # return connection
-        pass
+        return connection
 
     @classmethod
-    def get_response(cls, cursor):
+    def get_response(cls, cursor: FlinkCursor):
         """
         Gets a cursor object and returns adapter-specific information
         about the last executed command generally a AdapterResponse ojbect
         that has items such as code, rows_affected,etc. can also just be a string ex. "OK"
         if your cursor does not offer rich metadata.
         """
-        # ## Example ##
-        # return cursor.status_message
-        pass
+        return cursor.get_status()
 
     def cancel(self, connection):
         """
@@ -136,3 +113,11 @@ class FlinkConnectionManager(SQLConnectionManager):
         # res = cursor.fetchone()
         # logger.debug("Canceled query "{}": {}".format(connection_name, res))
         pass
+
+    # supress adding BEGIN and COMMIT as Flink does not handle transactions
+    def add_begin_query(self):
+        pass
+
+    def add_commit_query(self):
+        pass
+

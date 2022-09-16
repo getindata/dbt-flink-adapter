@@ -20,7 +20,7 @@ class SqlGatewayOperation:
         statement_request = {"statement": sql}
 
         response = requests.post(
-            url=f"${session.session_endpoint_url()}/statements",
+            url=f"{session.session_endpoint_url()}/statements",
             data=json.dumps(statement_request),
             headers={
                 "Content-Type": "application/json",
@@ -34,11 +34,11 @@ class SqlGatewayOperation:
             raise Exception("SQL gateway error: ", response.status_code)
 
     def statement_endpoint_url(self) -> str:
-        return f"${self.session.session_endpoint_url()}/operations/${self.operation_handle}"
+        return f"{self.session.session_endpoint_url()}/operations/{self.operation_handle}"
 
     def get_status(self) -> str:
         response = requests.get(
-            url=f"${self.statement_endpoint_url()}/status",
+            url=f"{self.statement_endpoint_url()}/status",
             headers={
                 "Content-Type": "application/json",
             },

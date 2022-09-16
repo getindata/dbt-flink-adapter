@@ -13,4 +13,4 @@ class SqlGatewayConfig:
         self.session_name = session_name
 
     def gateway_url(self) -> str:
-        return f"http://${self.host}:${self.port}"
+        return f"http://{self.host}:{self.port}"

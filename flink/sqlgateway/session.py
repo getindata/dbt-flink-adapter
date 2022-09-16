@@ -17,7 +17,7 @@ class SqlGatewaySession:
         session_request = {"sessionName": config.session_name}
 
         response = requests.post(
-            url=f"${config.gateway_url()}/v1/sessions",
+            url=f"{config.gateway_url()}/v1/sessions",
             data=json.dumps(session_request),
             headers={
                 "Content-Type": "application/json",
