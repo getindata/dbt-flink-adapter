@@ -1,6 +1,6 @@
 import pytest
 
-# import os
+import os
 # import json
 
 # Import the fuctional fixtures as a plugin
@@ -12,4 +12,10 @@ pytest_plugins = ["dbt.tests.fixtures.project"]
 # The profile dictionary, used to write out profiles.yml
 @pytest.fixture(scope="class")
 def dbt_profile_target():
-    pass
+    return {
+        'type': 'flink',
+        'threads': 1,
+        'host': os.getenv('FLINK_SQL_GATEWAY_HOST', '127.0.0.1'),
+        'port': int(os.getenv('FLINK_SQL_GATEWAY_PORT', '8083')),
+        'session_name': os.getenv('SESSION_NAME', 'test_session')
+    }
