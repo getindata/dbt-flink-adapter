@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import json
+from typing import Optional
+
 import requests
 
 from flink.sqlgateway.result_parser import SqlGatewayResult, SqlGatewayResultParser
@@ -62,9 +64,13 @@ class SqlGatewayOperation:
         else:
             raise Exception("SQL gateway error: ", response.status_code)
 
-    def result(self, page: int = 0) -> SqlGatewayResult:
+    def result(self, next_page: Optional[str] = None) -> SqlGatewayResult:
+        result_page_url = next_page
+        if result_page_url is None:
+            result_page_url = f"${self.statement_endpoint_url()}/result/0"
+
         response = requests.post(
-            url=f"${self.statement_endpoint_url()}/result/{page}",
+            url=result_page_url,
             headers={
                 "Content-Type": "application/json",
             },
