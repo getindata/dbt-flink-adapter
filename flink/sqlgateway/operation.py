@@ -3,6 +3,8 @@ import json
 from typing import Optional
 
 import requests
+
+from flink.sqlgateway.result_parser import SqlGatewayResult, SqlGatewayResultParser
 from flink.sqlgateway.session import SqlGatewaySession
 
 
@@ -59,6 +61,23 @@ class SqlGatewayOperation:
 
         if response.status_code == 200:
             return response.json()["status"]
+        else:
+            raise Exception("SQL gateway error: ", response.status_code)
+
+    def result(self, next_page: Optional[str] = None) -> SqlGatewayResult:
+        result_page_url = next_page
+        if result_page_url is None:
+            result_page_url = f"${self.statement_endpoint_url()}/result/0"
+
+        response = requests.post(
+            url=result_page_url,
+            headers={
+                "Content-Type": "application/json",
+            },
+        )
+
+        if response.status_code == 200:
+            return SqlGatewayResultParser.parse_result(response.json())
         else:
             raise Exception("SQL gateway error: ", response.status_code)
 
