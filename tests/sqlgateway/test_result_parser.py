@@ -45,6 +45,7 @@ class SqlGatewayResultParserTest(unittest.TestCase):
         self.assertEqual(result.next_result_url, "/v1/sessions/1c20ff6b-b060-49a6-b311-3210ba766b65/operations/84313330-bf20-4b87-bfc2-7b629908866d/result/1")
         self.assertEqual(1, result.rows[0]["id"], "ID column of the first row should be = 1")
         self.assertEqual("aaa", result.rows[0]["content"], "ID column of the first row should be = 'aaa'")
+        self.assertEqual(["id", "content"], result.column_names, "Column names should match expected")
 
 
 if __name__ == '__main__':

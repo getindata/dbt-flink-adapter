@@ -6,9 +6,11 @@ from typing import Dict, List, Any
 class SqlGatewayResult:
     rows: List[Dict[str, Any]]
     next_result_url: str
+    column_names: List[str]
 
-    def __init__(self, rows: List[Dict[str, Any]], next_result_url: str):
+    def __init__(self, rows: List[Dict[str, Any]], column_names: List[str], next_result_url: str):
         self.rows = rows
+        self.column_names = column_names
         self.next_result_url = next_result_url
 
 
@@ -18,6 +20,7 @@ class SqlGatewayResultParser:
         columns = data["results"]["columns"]
         rows: List[Dict[str, Any]] = []
         next_result_url = data["nextResultUri"]
+        column_names: List[str] = list(map(lambda c: c["name"], columns))
 
         for record in data["results"]["data"]:
             current_row: Dict[str, Any] = {}
@@ -28,5 +31,6 @@ class SqlGatewayResultParser:
 
         return SqlGatewayResult(
             rows=rows,
+            column_names=column_names,
             next_result_url=next_result_url
         )
