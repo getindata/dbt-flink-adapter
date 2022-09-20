@@ -1,5 +1,3 @@
-
--- Use the `ref` function to select from other models
-
 select *
 from {{ ref('input') }}
+where id = 3
