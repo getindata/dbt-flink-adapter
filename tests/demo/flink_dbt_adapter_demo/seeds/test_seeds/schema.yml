@@ -1,0 +1,13 @@
+version: 2
+
+seeds:
+  - name: test_messages
+    description: "Test messages"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: content
+        description: "Table content"

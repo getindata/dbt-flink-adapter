@@ -1,0 +1,25 @@
+
+version: 2
+
+models:
+  - name: input
+    description: "Input model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: content
+        description: "Table content"
+
+  - name: output
+    description: "Output model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: content
+        description: "Table content"
