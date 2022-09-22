@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List, Any
 
+from dbt.events import AdapterLogger
+
+logger = AdapterLogger("Flink")
 
 @dataclass
 class SqlGatewayResult:
@@ -22,6 +25,7 @@ class SqlGatewayResultParser:
         next_result_url = data["nextResultUri"]
         column_names: List[str] = list(map(lambda c: c["name"], columns))
 
+        logger.info(f"SQL rows returned: {data['results']['data']}")
         for record in data["results"]["data"]:
             current_row: Dict[str, Any] = {}
             for column_index in range(0, len(columns)):

@@ -1,12 +1,9 @@
 from dataclasses import dataclass
 import json
 from typing import Optional
-
 import requests
-
 from flink.sqlgateway.result_parser import SqlGatewayResult, SqlGatewayResultParser
 from flink.sqlgateway.session import SqlGatewaySession
-
 
 @dataclass
 class SqlGatewayOperation:
@@ -28,6 +25,8 @@ class SqlGatewayOperation:
                 "Content-Type": "application/json",
             },
         )
+
+        print(f"SQL gateway response: {json.dumps(response.json())}")
 
         if response.status_code == 200:
             operation_handle = response.json()["operationHandle"]
@@ -53,7 +52,7 @@ class SqlGatewayOperation:
 
     def cancel(self) -> str:
         response = requests.post(
-            url=f"${self.statement_endpoint_url()}/cancel",
+            url=f"{self.statement_endpoint_url()}/cancel",
             headers={
                 "Content-Type": "application/json",
             },
@@ -64,12 +63,13 @@ class SqlGatewayOperation:
         else:
             raise Exception("SQL gateway error: ", response.status_code)
 
-    def result(self, next_page: Optional[str] = None) -> SqlGatewayResult:
-        result_page_url = next_page
-        if result_page_url is None:
-            result_page_url = f"${self.statement_endpoint_url()}/result/0"
+    def get_result(self, next_page: Optional[str] = None) -> SqlGatewayResult:
+        if next_page is None:
+            result_page_url = f"{self.statement_endpoint_url()}/result/0"
+        else:
+            result_page_url = f"{self.session.config.gateway_url()}{next_page}"
 
-        response = requests.post(
+        response = requests.get(
             url=result_page_url,
             headers={
                 "Content-Type": "application/json",
@@ -79,5 +79,5 @@ class SqlGatewayOperation:
         if response.status_code == 200:
             return SqlGatewayResultParser.parse_result(response.json())
         else:
-            raise Exception("SQL gateway error: ", response.status_code)
+            raise Exception("SQL gateway error: ", response.reason)
 

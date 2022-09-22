@@ -4,6 +4,7 @@ from typing import Sequence, Tuple, Optional, Any
 from dbt.events import AdapterLogger
 
 from flink.sqlgateway.operation import SqlGatewayOperation
+from flink.sqlgateway.result_parser import SqlGatewayResult
 from flink.sqlgateway.session import SqlGatewaySession
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 
@@ -12,6 +13,7 @@ logger = AdapterLogger("Flink")
 class FlinkCursor:
     session: SqlGatewaySession
     last_operation: SqlGatewayOperation = None
+    last_result: SqlGatewayResult = None
 
     def __init__(self, session):
         self.session = session
@@ -23,6 +25,10 @@ class FlinkCursor:
         pass
 
     def fetchall(self) -> Sequence[Tuple]:
+        logger.info(f"Fetching results... {self.last_operation.statement_endpoint_url()}/result/0")
+        last_result = self.last_operation.get_result(next_page=None)
+        logger.info(f"Fetchall returned: {len(last_result.rows)} rows")
+        # TODO convert to Sequence[Tuple]
         return []
 
     def fetchone(self) -> Optional[Tuple]:
@@ -41,6 +47,9 @@ class FlinkCursor:
 
     @property
     def description(self) -> Tuple[Tuple[str]]:
+        # FIXME This method is called by DBT before fetchall - so we dont know the columns yet :(
+        if self.last_result is not None:
+            return self.last_result.column_names
         # This must return column names so this can read it dbt/adapters/sql/connections.py:113
         return (())
 
