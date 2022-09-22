@@ -1,5 +1,6 @@
+import json
 from time import sleep
-from typing import Sequence, Tuple, Optional, Any
+from typing import Sequence, Tuple, Optional, Any, List
 
 from dbt.events import AdapterLogger
 
@@ -25,11 +26,19 @@ class FlinkCursor:
         pass
 
     def fetchall(self) -> Sequence[Tuple]:
+        # TODO I think we need to wait until last_operation is finished before fetching the result otherwise first pages will not have any result
+        result_list: List[Tuple] = []
+
         logger.info(f"Fetching results... {self.last_operation.statement_endpoint_url()}/result/0")
         last_result = self.last_operation.get_result(next_page=None)
-        logger.info(f"Fetchall returned: {len(last_result.rows)} rows")
-        # TODO convert to Sequence[Tuple]
-        return []
+        while last_result is not None and last_result.next_result_url is not None:
+            logger.info(f"Fetchall returned: {len(last_result.rows)} rows")
+            for record in last_result.rows:
+                result_list.append(tuple(record.values()))
+            last_result = self.last_operation.get_result(next_page=last_result.next_result_url)
+
+        logger.info(f"Fetchall returned: {result_list}")
+        return result_list
 
     def fetchone(self) -> Optional[Tuple]:
         return None
