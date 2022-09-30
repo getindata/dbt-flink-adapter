@@ -4,6 +4,7 @@ import agate
 from dbt.adapters.base import BaseAdapter as adapter_cls, BaseRelation, Column as BaseColumn
 
 from dbt.adapters.flink import FlinkConnectionManager
+from dbt.adapters.flink.relation import FlinkRelation
 
 
 class FlinkAdapter(adapter_cls):
@@ -12,6 +13,7 @@ class FlinkAdapter(adapter_cls):
     """
 
     ConnectionManager = FlinkConnectionManager
+    Relation = FlinkRelation
 
     @classmethod
     def date_function(cls):
@@ -22,27 +24,27 @@ class FlinkAdapter(adapter_cls):
 
     @classmethod
     def convert_text_type(cls, agate_table: agate.Table, col_idx: int) -> str:
-        pass
+        return "STRING"
 
     @classmethod
     def convert_number_type(cls, agate_table: agate.Table, col_idx: int) -> str:
-        pass
+        return "DECIMAL"
 
     @classmethod
     def convert_boolean_type(cls, agate_table: agate.Table, col_idx: int) -> str:
-        pass
+        return "BOOLEAN"
 
     @classmethod
     def convert_datetime_type(cls, agate_table: agate.Table, col_idx: int) -> str:
-        pass
+        return "TIMESTAMP"
 
     @classmethod
     def convert_date_type(cls, agate_table: agate.Table, col_idx: int) -> str:
-        pass
+        return "DATE"
 
     @classmethod
     def convert_time_type(cls, agate_table: agate.Table, col_idx: int) -> str:
-        pass
+        return "TIME"
 
     def create_schema(self, relation: BaseRelation):
         pass
@@ -71,10 +73,12 @@ class FlinkAdapter(adapter_cls):
 
     @classmethod
     def quote(cls, identifier: str) -> str:
-        pass
+        return identifier
+        # return '"{}"'.format(identifier)
 
     def rename_relation(self, from_relation: BaseRelation, to_relation: BaseRelation) -> None:
         pass
 
     def truncate_relation(self, relation: BaseRelation) -> None:
         pass
+
