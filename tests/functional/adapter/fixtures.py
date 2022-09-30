@@ -9,6 +9,12 @@ id,name,some_date
 
 # models/my_model.sql
 my_model_sql = """
+{% if execute %}
+  {% for node in graph.sources.values() -%}
+    {% do log("SOURCE: " ~ node.source_name ~ " with config: " ~ node.config.my_source_config, info=true) %}
+  {%- endfor %}
+{% endif %}
+
 select * from {{ source('my_source', 'customers') }}
 """
 
@@ -23,18 +29,22 @@ models:
     columns:
       - name: id
       - name: name
+"""
+
+my_source_yml = """
+version: 2
 sources:
   - name: my_source
     config:
       my_source_config:
-        - my_config_property_1: 2
-        - my_config_property_2: 2
+        my_config_property_1: 2
+        my_config_property_2: 2
     tables:
       - name: customers
         config:
           customers_table_config:
-            - my_config_property_3: 3
-            - my_config_property_4: "{{ var('my_config_property_4', 4) }}"
+            my_config_property_3: 3
+            my_config_property_4: "{{ var('my_config_property_4', 4) }}"
         columns:
           - name: id
             description: Primary key of the table
