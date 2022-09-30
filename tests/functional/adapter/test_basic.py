@@ -14,41 +14,41 @@ from dbt.tests.adapter.basic.test_snapshot_timestamp import BaseSnapshotTimestam
 from dbt.tests.adapter.basic.test_adapter_methods import BaseAdapterMethod
 
 
-# class TestSimpleMaterializationsFlink(BaseSimpleMaterializations):
-#     pass
-#
-#
+class TestSimpleMaterializationsFlink(BaseSimpleMaterializations):
+    pass
+
+
 class TestSingularTestsFlink(BaseSingularTests):
     pass
-#
-#
-# class TestSingularTestsEphemeralFlink(BaseSingularTestsEphemeral):
-#     pass
-#
-#
-# class TestEmptyFlink(BaseEmpty):
-#     pass
-#
-#
-# class TestEphemeralFlink(BaseEphemeral):
-#     pass
-#
-#
-# class TestIncrementalFlink(BaseIncremental):
-#     pass
-#
-#
-# class TestGenericTestsFlink(BaseGenericTests):
-#     pass
-#
-#
-# class TestSnapshotCheckColsFlink(BaseSnapshotCheckCols):
-#     pass
-#
 
-# class TestSnapshotTimestampFlink(BaseSnapshotTimestamp):
-#     pass
-#
-#
-# class TestBaseAdapterMethodFlink(BaseAdapterMethod):
-#     pass
+
+class TestSingularTestsEphemeralFlink(BaseSingularTestsEphemeral):
+    pass
+
+
+class TestEmptyFlink(BaseEmpty):
+    pass
+
+
+class TestEphemeralFlink(BaseEphemeral):
+    pass
+
+
+class TestIncrementalFlink(BaseIncremental):
+    pass
+
+
+class TestGenericTestsFlink(BaseGenericTests):
+    pass
+
+
+class TestSnapshotCheckColsFlink(BaseSnapshotCheckCols):
+    pass
+
+
+class TestSnapshotTimestampFlink(BaseSnapshotTimestamp):
+    pass
+
+
+class TestBaseAdapterMethodFlink(BaseAdapterMethod):
+    pass

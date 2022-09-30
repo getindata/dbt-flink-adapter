@@ -6,6 +6,8 @@ prompts:
   port:
     default: 5432
     type: "int"
+  session_name:
+    default: "test_session"
   user:
     hint: "dev username"
   password:
