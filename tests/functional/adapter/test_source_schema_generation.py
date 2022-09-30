@@ -32,7 +32,7 @@ class TestSourceTablesGeneration:
             "my_model.yml": my_model_yml,
         }
 
-    def test_run_source_test(self, project):
+    def test_create_source_tables(self, project):
         # run models
         results = run_dbt(["run"])
         assert len(results) == 1
@@ -42,9 +42,3 @@ class TestSourceTablesGeneration:
         # validate that the results include one pass and one failure
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["fail", "pass"]
-
-    @pytest.mark.xfail
-    def test_build(self, project):
-        """Expect a failing test"""
-        # do it all
-        results = run_dbt(["build"])
