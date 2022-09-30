@@ -13,6 +13,18 @@ from dbt.tests.adapter.basic.test_snapshot_check_cols import BaseSnapshotCheckCo
 from dbt.tests.adapter.basic.test_snapshot_timestamp import BaseSnapshotTimestamp
 from dbt.tests.adapter.basic.test_adapter_methods import BaseAdapterMethod
 
+from dbt.tests.util import (
+    run_dbt,
+    check_result_nodes_by_name,
+    relation_from_name,
+    check_relation_types,
+    check_relations_equal,
+)
+
+from dbt.tests.adapter.basic.files import (
+    seeds_base_csv,
+)
+
 
 class TestSimpleMaterializationsFlink(BaseSimpleMaterializations):
     pass
@@ -20,35 +32,56 @@ class TestSimpleMaterializationsFlink(BaseSimpleMaterializations):
 
 class TestSingularTestsFlink(BaseSingularTests):
     pass
-
-
-class TestSingularTestsEphemeralFlink(BaseSingularTestsEphemeral):
-    pass
-
-
+#
+#
+# class TestSingularTestsEphemeralFlink(BaseSingularTestsEphemeral):
+#     pass
+#
+#
 class TestEmptyFlink(BaseEmpty):
     pass
 
 
-class TestEphemeralFlink(BaseEphemeral):
-    pass
-
-
-class TestIncrementalFlink(BaseIncremental):
-    pass
-
-
+# class TestEphemeralFlink(BaseEphemeral):
+#     pass
+#
+#
+# class TestIncrementalFlink(BaseIncremental):
+#     pass
+#
+#
 class TestGenericTestsFlink(BaseGenericTests):
     pass
 
 
-class TestSnapshotCheckColsFlink(BaseSnapshotCheckCols):
-    pass
+# class TestSnapshotCheckColsFlink(BaseSnapshotCheckCols):
+#     pass
+#
+
+# class TestSnapshotTimestampFlink(BaseSnapshotTimestamp):
+#     pass
+#
+#
+# class TestBaseAdapterMethodFlink(BaseAdapterMethod):
+#     pass
 
 
-class TestSnapshotTimestampFlink(BaseSnapshotTimestamp):
-    pass
+class TestSeed():
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "base.csv": seeds_base_csv,
+        }
 
+    @pytest.fixture(scope="class")
+    def project_config_update(self):
+        return {
+            "name": "base",
+        }
 
-class TestBaseAdapterMethodFlink(BaseAdapterMethod):
-    pass
+    def test_seed(self, project):
+
+        # seed command
+        results = run_dbt(["seed"], expect_pass=False)
+        # seed result length
+        assert len(results) == 1
