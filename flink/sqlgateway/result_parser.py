@@ -10,13 +10,13 @@ class SqlGatewayResult:
     rows: List[Dict[str, Any]]
     next_result_url: str
     column_names: List[str]
-    is_end_of_steam: bool
+    is_end_of_stream: bool
 
     def __init__(self, rows: List[Dict[str, Any]], column_names: List[str], next_result_url: str, is_end_of_steam: bool):
         self.rows = rows
         self.column_names = column_names
         self.next_result_url = next_result_url
-        self.is_end_of_steam = is_end_of_steam
+        self.is_end_of_stream = is_end_of_steam
 
 
 class SqlGatewayResultParser:

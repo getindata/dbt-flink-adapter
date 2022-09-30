@@ -55,11 +55,11 @@ class SqlGatewayResultParserTest(unittest.TestCase):
         self.assertEqual(1, result.rows[0]["id"], "ID column of the first row should be = 1")
         self.assertEqual("aaa", result.rows[0]["content"], "ID column of the first row should be = 'aaa'")
         self.assertEqual(["id", "content"], result.column_names, "Column names should match expected")
-        self.assertEqual(False, result.is_end_of_steam, "Should not be end of stream")
+        self.assertEqual(False, result.is_end_of_stream, "Should not be end of stream")
 
     def test_is_end_of_stream(self):
         result = SqlGatewayResultParser.parse_result(end_of_stream_input)
-        self.assertEqual(True, result.is_end_of_steam, "Should be end of stream")
+        self.assertEqual(True, result.is_end_of_stream, "Should be end of stream")
 
 
 if __name__ == '__main__':
