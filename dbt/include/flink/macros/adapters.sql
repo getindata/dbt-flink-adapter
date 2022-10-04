@@ -3,12 +3,6 @@ postgres adapter macros: https://github.com/dbt-labs/dbt-core/blob/main/plugins/
 dbt docs: https://docs.getdbt.com/docs/contributing/building-a-new-adapter
 */
 
-{% macro flink__create_source_tables(config) -%}
-  {%- call statement('define_source_tables', config) -%}
-    {{ config.get('sources.config.my_source_config', '???') }}
-  {%- endcall -%}
-{% endmacro %}
-
 {% macro flink__alter_column_type(relation,column_name,new_column_type) -%}
 '''Changes column name or data type'''
 /*

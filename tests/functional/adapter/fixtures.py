@@ -7,15 +7,23 @@ id,name,some_date
 4,Nolan,1976-05-06T20:21:35
 """.lstrip()
 
+# https://docs.getdbt.com/reference/dbt-jinja-functions/run_query
+# https://aiven.io/blog/build-a-streaming-sql-pipeline-with-flink-and-kafka
+# https://github.com/dbt-labs/dbt-codegen#generate_source-source
+
+# for later use in source materialization
+# {% if execute %}
+#   {% for node in graph.sources.values() -%}
+#     {% do log("SOURCE: " ~ node.identifier ~ " with config: " ~ node.config.connector_properties ~ ", COLUMNS: " ~ node.columns, info=true) %}
+#   {%- endfor %}
+#   {% set results = run_query('select 1 as id') %}
+#   {% do results.print_table() %}
+# {% endif %}
+
+
 # models/my_model.sql
 my_model_sql = """
-{% if execute %}
-  {% for node in graph.sources.values() -%}
-    {% do log("SOURCE: " ~ node.source_name ~ " with config: " ~ node.config.my_source_config, info=true) %}
-  {%- endfor %}
-{% endif %}
-
-select * from {{ source('my_source', 'customers') }}
+select * from {{ source('my_source', 'input_topic') }}
 """
 
 # models/my_model.yml
@@ -26,6 +34,13 @@ models:
     config:
       database: my_model_database
       schema: my_model_schema
+      connector_properties:
+        connector: 'kafka'
+        'properties.bootstrap.servers': '1270.0.0.1:9092'
+        'topic': 'customers'
+        'scan.startup.mode': 'earliest-offset'
+        'value.format': 'json'
+        'properties.group.id': 'my-working-group'
     columns:
       - name: id
       - name: name
@@ -36,11 +51,15 @@ version: 2
 sources:
   - name: my_source
     config:
-      my_source_config:
-        my_config_property_1: 2
-        my_config_property_2: 2
+      connector_properties:
+        connector: 'kafka'
+        'properties.bootstrap.servers': '1270.0.0.1:9092'
+        'topic': 'customers'
+        'scan.startup.mode': 'earliest-offset'
+        'value.format': 'json'
+        'properties.group.id': 'my-working-group'
     tables:
-      - name: customers
+      - name: input_topic
         config:
           customers_table_config:
             my_config_property_3: 3
@@ -48,5 +67,18 @@ sources:
         columns:
           - name: id
             description: Primary key of the table
+            data_type: varchar
           - name: name
+            data_type: varchar
+      - name: output_topic
+        config:
+          customers_table_config:
+            my_config_property_3: 3
+            my_config_property_4: "{{ var('my_config_property_4', 4) }}"
+        columns:
+          - name: id
+            description: Primary key of the table
+            data_type: varchar
+          - name: name
+            data_type: varchar
 """
