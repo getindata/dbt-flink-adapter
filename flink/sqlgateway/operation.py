@@ -63,6 +63,19 @@ class SqlGatewayOperation:
         else:
             raise Exception("SQL gateway error: ", response.status_code)
 
+    def close(self) -> str:
+        response = requests.delete(
+            url=f"{self.statement_endpoint_url()}/close",
+            headers={
+                "Content-Type": "application/json",
+            },
+        )
+
+        if response.status_code == 200:
+            return response.json()["status"]
+        else:
+            raise Exception("SQL gateway error: ", response.status_code)
+
     def get_result(self, next_page: Optional[str] = None) -> SqlGatewayResult:
         if next_page is None:
             result_page_url = f"{self.statement_endpoint_url()}/result/0"
