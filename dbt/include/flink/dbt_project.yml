@@ -3,3 +3,5 @@ version: 0.0.1
 config-version: 2
 
 macro-paths: ["macros"]
+on-run-start:
+    - '{{ create_sources() }}'
