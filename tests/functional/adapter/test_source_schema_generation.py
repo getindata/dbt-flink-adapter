@@ -4,6 +4,7 @@ from dbt.tests.util import run_dbt
 from tests.functional.adapter.fixtures import (
     my_model_sql,
     my_model_yml,
+    my_source_yml,
 )
 
 
@@ -30,6 +31,7 @@ class TestSourceTablesGeneration:
         return {
             "my_model.sql": my_model_sql,
             "my_model.yml": my_model_yml,
+            "my_source.yml": my_source_yml,
         }
 
     def test_create_source_tables(self, project):
