@@ -60,6 +60,7 @@ sources:
             'scan.startup.mode': 'earliest-offset'
             'value.format': 'json'
             'properties.group.id': 'my-working-group'
+            'value.json.encode.decimal-as-plain-number': 'true'
         columns:
           - name: id
             description: Primary key of the table
@@ -75,6 +76,7 @@ sources:
             'scan.startup.mode': 'earliest-offset'
             'value.format': 'json'
             'properties.group.id': 'my-working-group'
+            'value.json.encode.decimal-as-plain-number': 'true'
         columns:
           - name: id
             description: Primary key of the table

@@ -35,6 +35,7 @@ seeds:
         'scan.startup.mode': 'earliest-offset'
         'value.format': 'json'
         'properties.group.id': 'my-working-group'
+        'value.json.encode.decimal-as-plain-number': 'true'
 """
 
 test_passing_sql = """
