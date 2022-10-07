@@ -26,7 +26,6 @@ class FlinkCursor:
         logger.info("Creating new cursor for session {}".format(session))
         self.session = session
         self.result_buffer = []
-        self.execute("SET 'execution.runtime-mode' = 'batch'")
 
     def cancel(self) -> None:
         pass
@@ -70,6 +69,9 @@ class FlinkCursor:
         return None
 
     def execute(self, sql: str, bindings: Optional[Sequence[Any]] = None) -> None:
+        logger.info('Preparing statement "{}"'.format(sql))
+        if bindings is not None:
+            sql = sql.format(*[self._convert_binding(binding) for binding in bindings])
         logger.info('Executing statement "{}"'.format(sql))
         self.last_query_hints = QueryHintsParser.parse(sql)
         self._set_query_mode()
@@ -83,6 +85,13 @@ class FlinkCursor:
         self.last_query_start_time = self._get_current_timestamp()
 
         self.last_operation = operation_handle
+
+    def _convert_binding(self, binding):
+        if isinstance(binding, str):
+            return "'{}'".format(binding)
+        if isinstance(binding, datetime):
+            return "TIMESTAMP '{}'".format(binding)
+        return binding
 
     @property
     def description(self) -> Tuple[Tuple[str]]:
@@ -113,9 +122,11 @@ class FlinkCursor:
         return status
 
     def _set_query_mode(self):
+        runtime_mode = "batch"
         if self.last_query_hints.fetch_mode is not None:
-            FlinkSqlGatewayClient.execute_statement(self.session, "SET 'execution.runtime-mode' = '{}'".format(
-                self.last_query_hints.fetch_mode))
+            runtime_mode = self.last_query_hints.fetch_mode
+        logger.info("Setting 'execution.runtime-mode' to '{}'".format(runtime_mode))
+        FlinkSqlGatewayClient.execute_statement(self.session, "SET 'execution.runtime-mode' = '{}'".format(runtime_mode))
 
     def get_status(self) -> str:
         if self.last_operation is not None:
