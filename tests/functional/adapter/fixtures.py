@@ -50,35 +50,35 @@ my_source_yml = """
 version: 2
 sources:
   - name: my_source
-    config:
-      connector_properties:
-        connector: 'kafka'
-        'properties.bootstrap.servers': '127.0.0.1:9092'
-        'topic': 'customers'
-        'scan.startup.mode': 'earliest-offset'
-        'value.format': 'json'
-        'properties.group.id': 'my-working-group'
     tables:
       - name: input_topic
         config:
-          customers_table_config:
-            my_config_property_3: 3
-            my_config_property_4: "{{ var('my_config_property_4', 4) }}"
+          connector_properties:
+            connector: 'kafka'
+            'properties.bootstrap.servers': '127.0.0.1:9092'
+            'topic': 'input_topic'
+            'scan.startup.mode': 'earliest-offset'
+            'value.format': 'json'
+            'properties.group.id': 'my-working-group'
         columns:
           - name: id
             description: Primary key of the table
-            data_type: varchar
+            data_type: STRING
           - name: name
-            data_type: varchar
+            data_type: STRING
       - name: output_topic
         config:
-          customers_table_config:
-            my_config_property_3: 3
-            my_config_property_4: "{{ var('my_config_property_4', 4) }}"
+          connector_properties:
+            connector: 'kafka'
+            'properties.bootstrap.servers': '127.0.0.1:9092'
+            'topic': 'output_topic'
+            'scan.startup.mode': 'earliest-offset'
+            'value.format': 'json'
+            'properties.group.id': 'my-working-group'
         columns:
           - name: id
             description: Primary key of the table
-            data_type: varchar
+            data_type: STRING
           - name: name
-            data_type: varchar
+            data_type: STRING
 """
