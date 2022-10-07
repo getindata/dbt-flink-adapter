@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS {{ node.identifier }} (
 {% endfor %}
 )
 with (
-{% for property_name in connector_properties %} '{{ property_name }}': '{{ connector_properties[property_name] }}'{% if not loop.last %},{% endif %}
+{% for property_name in connector_properties %} '{{ property_name }}' = '{{ connector_properties[property_name] }}'{% if not loop.last %},{% endif %}
 {% endfor %}
 );
 {% endset %}
