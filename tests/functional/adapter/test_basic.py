@@ -64,24 +64,3 @@ class TestGenericTestsFlink(BaseGenericTests):
 #
 # class TestBaseAdapterMethodFlink(BaseAdapterMethod):
 #     pass
-
-
-class TestSeed():
-    @pytest.fixture(scope="class")
-    def seeds(self):
-        return {
-            "base.csv": seeds_base_csv,
-        }
-
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-            "name": "base",
-        }
-
-    def test_seed(self, project):
-
-        # seed command
-        results = run_dbt(["seed"], expect_pass=False)
-        # seed result length
-        assert len(results) == 1

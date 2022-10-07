@@ -36,7 +36,7 @@ models:
       schema: my_model_schema
       connector_properties:
         connector: 'kafka'
-        'properties.bootstrap.servers': '127.0.0.1:9092'
+        'properties.bootstrap.servers': 'kafka:29092'
         'topic': 'customers'
         'scan.startup.mode': 'earliest-offset'
         'value.format': 'json'
@@ -55,7 +55,7 @@ sources:
         config:
           connector_properties:
             connector: 'kafka'
-            'properties.bootstrap.servers': '127.0.0.1:9092'
+            'properties.bootstrap.servers': 'kafka:29092'
             'topic': 'input_topic'
             'scan.startup.mode': 'earliest-offset'
             'value.format': 'json'
@@ -70,7 +70,7 @@ sources:
         config:
           connector_properties:
             connector: 'kafka'
-            'properties.bootstrap.servers': '127.0.0.1:9092'
+            'properties.bootstrap.servers': 'kafka:29092'
             'topic': 'output_topic'
             'scan.startup.mode': 'earliest-offset'
             'value.format': 'json'

@@ -1,9 +1,11 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
+from typing import Optional, Any, Tuple
 
 import dbt.exceptions  # noqa
 from dbt.adapters.base import Credentials
 from dbt.adapters.sql import SQLConnectionManager  # type: ignore
+from dbt.contracts.connection import Connection
 from dbt.events import AdapterLogger
 
 from dbt.adapters.flink.handler import FlinkHandler, FlinkCursor
@@ -120,4 +122,5 @@ class FlinkConnectionManager(SQLConnectionManager):
 
     def add_commit_query(self):
         pass
+
 

@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional, Any, Tuple
 
 import agate
-from dbt.adapters.base import BaseAdapter as adapter_cls, BaseRelation, Column as BaseColumn
+from dbt.adapters.base import BaseAdapter as adapter_cls, BaseRelation, Column as BaseColumn, available
 
 from dbt.adapters.flink import FlinkConnectionManager
 from dbt.adapters.flink.relation import FlinkRelation
@@ -20,7 +20,7 @@ class FlinkAdapter(adapter_cls):
         """
         Returns canonical date func
         """
-        return "datenow()"
+        return "CURRENT_DATE"
 
     @classmethod
     def convert_text_type(cls, agate_table: agate.Table, col_idx: int) -> str:
@@ -81,4 +81,25 @@ class FlinkAdapter(adapter_cls):
 
     def truncate_relation(self, relation: BaseRelation) -> None:
         pass
+
+    @available.parse(lambda *a, **k: (None, None))
+    def add_query(
+            self,
+            sql: str,
+            auto_begin: bool = True,
+            bindings: Optional[Any] = None,
+            abridge_sql_log: bool = False,
+    ) -> Tuple[FlinkConnectionManager, Any]:
+        """Add a query to the current transaction. A thin wrapper around
+        ConnectionManager.add_query.
+
+        :param sql: The SQL query to add
+        :param auto_begin: If set and there is no transaction in progress,
+            begin a new one.
+        :param bindings: An optional list of bindings for the query.
+        :param abridge_sql_log: If set, limit the raw sql logged to 512
+            characters
+        """
+        return self.connections.add_query(sql, auto_begin, bindings, abridge_sql_log)
+
 
