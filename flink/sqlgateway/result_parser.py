@@ -14,11 +14,11 @@ class SqlGatewayResult:
     is_end_of_stream: bool
 
     def __init__(
-            self,
-            rows: List[Dict[str, Any]],
-            column_names: List[str],
-            next_result_url: str,
-            is_end_of_steam: bool
+        self,
+        rows: List[Dict[str, Any]],
+        column_names: List[str],
+        next_result_url: str,
+        is_end_of_steam: bool,
     ):
         self.rows = rows
         self.column_names = column_names

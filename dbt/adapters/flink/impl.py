@@ -89,11 +89,11 @@ class FlinkAdapter(adapter_cls):
 
     @available.parse(lambda *a, **k: (None, None))
     def add_query(
-            self,
-            sql: str,
-            auto_begin: bool = True,
-            bindings: Optional[Any] = None,
-            abridge_sql_log: bool = False,
+        self,
+        sql: str,
+        auto_begin: bool = True,
+        bindings: Optional[Any] = None,
+        abridge_sql_log: bool = False,
     ) -> Tuple[FlinkConnectionManager, Any]:
         """Add a query to the current transaction. A thin wrapper around
         ConnectionManager.add_query.

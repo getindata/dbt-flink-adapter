@@ -92,7 +92,7 @@ class FlinkCursor:
             )
         )
         if status == "ERROR":
-            raise Exception('Statement execution failed')
+            raise Exception("Statement execution failed")
 
         self.last_query_start_time = self._get_current_timestamp()
 
