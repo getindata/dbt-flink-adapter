@@ -5,6 +5,7 @@ import requests
 from flink.sqlgateway.result_parser import SqlGatewayResult, SqlGatewayResultParser
 from flink.sqlgateway.session import SqlGatewaySession
 
+
 @dataclass
 class SqlGatewayOperation:
     session: SqlGatewaySession
@@ -93,4 +94,3 @@ class SqlGatewayOperation:
             return SqlGatewayResultParser.parse_result(response.json())
         else:
             raise Exception("SQL gateway error: ", response.reason)
-

@@ -122,5 +122,3 @@ class FlinkConnectionManager(SQLConnectionManager):
 
     def add_commit_query(self):
         pass
-
-

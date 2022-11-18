@@ -18,7 +18,6 @@ class QueryHints:
             self.fetch_mode = hints["fetch_mode"]
 
 
-
 class QueryHintsParser:
     @staticmethod
     def parse(sql: str) -> QueryHints:
@@ -34,4 +33,4 @@ class QueryHintsParser:
 
     @staticmethod
     def _strip_quotes(txt: str) -> str:
-        return txt.strip().strip('\"').strip("\'")
+        return txt.strip().strip('"').strip("'")

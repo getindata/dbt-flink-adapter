@@ -37,7 +37,11 @@ class FlinkCursor:
         if self.last_result is None:
             self._buffer_results()
 
-        while not self.last_result.is_end_of_stream and not self._buffered_fetch_max() and not self._exceeded_timeout():
+        while (
+            not self.last_result.is_end_of_stream
+            and not self._buffered_fetch_max()
+            and not self._exceeded_timeout()
+        ):
             sleep(0.1)
             self._buffer_results()
 
@@ -52,12 +56,17 @@ class FlinkCursor:
             self.last_operation.close()
 
     def _buffered_fetch_max(self):
-        return self.last_query_hints.fetch_max is not None \
-               and self.buffered_results_counter >= self.last_query_hints.fetch_max
+        return (
+            self.last_query_hints.fetch_max is not None
+            and self.buffered_results_counter >= self.last_query_hints.fetch_max
+        )
 
     def _exceeded_timeout(self):
-        return self.last_query_hints.fetch_timeout_ms is not None \
-               and self._get_current_timestamp() > self.last_query_start_time + self.last_query_hints.fetch_timeout_ms / 1000
+        return (
+            self.last_query_hints.fetch_timeout_ms is not None
+            and self._get_current_timestamp()
+            > self.last_query_start_time + self.last_query_hints.fetch_timeout_ms / 1000
+        )
 
     def fetchone(self) -> Optional[Tuple]:
         if len(self.result_buffer) == 0:
@@ -77,9 +86,12 @@ class FlinkCursor:
         self._set_query_mode()
         operation_handle = FlinkSqlGatewayClient.execute_statement(self.session, sql)
         status = self._wait_till_finished(operation_handle)
-        logger.info("Statement executed. Status {}, operation handle: {}"
-                    .format(status, operation_handle.operation_handle))
-        if status == 'ERROR':
+        logger.info(
+            "Statement executed. Status {}, operation handle: {}".format(
+                status, operation_handle.operation_handle
+            )
+        )
+        if status == "ERROR":
             raise Exception('Statement execution failed')
 
         self.last_query_start_time = self._get_current_timestamp()
@@ -116,7 +128,7 @@ class FlinkCursor:
     @staticmethod
     def _wait_till_finished(operation_handle: SqlGatewayOperation) -> str:
         status = operation_handle.get_status()
-        while status == 'RUNNING':
+        while status == "RUNNING":
             sleep(0.1)
             status = operation_handle.get_status()
         return status
@@ -126,7 +138,9 @@ class FlinkCursor:
         if self.last_query_hints.fetch_mode is not None:
             runtime_mode = self.last_query_hints.fetch_mode
         logger.info("Setting 'execution.runtime-mode' to '{}'".format(runtime_mode))
-        FlinkSqlGatewayClient.execute_statement(self.session, "SET 'execution.runtime-mode' = '{}'".format(runtime_mode))
+        FlinkSqlGatewayClient.execute_statement(
+            self.session, "SET 'execution.runtime-mode' = '{}'".format(runtime_mode)
+        )
 
     def get_status(self) -> str:
         if self.last_operation is not None:

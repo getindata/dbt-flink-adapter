@@ -8,6 +8,7 @@ class FlinkQuotePolicy(Policy):
     schema: bool = False
     identifier: bool = False
 
+
 @dataclass
 class FlinkIncludePolicy(Policy):
     database: bool = False

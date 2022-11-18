@@ -32,4 +32,3 @@ class SqlGatewaySession:
 
     def session_endpoint_url(self) -> str:
         return f"{self.config.gateway_url()}/v1/sessions/{self.session_handle}"
-
