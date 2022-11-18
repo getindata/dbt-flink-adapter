@@ -46,7 +46,7 @@ cd envs/kafka
 docker compose up
 
 cd envs/flink-1.16
-docker compose up 
+docker compose up
 ```
 
 ### Play with sample DBT project with `dbt-flink` adapter
