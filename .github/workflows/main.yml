@@ -86,7 +86,9 @@ jobs:
           pip install --upgrade setuptools wheel twine check-wheel-contents
           pip --version
       - name: Build distributions
-        run: ./scripts/build-dist.sh
+        run: |
+          chmod u+x ./scripts/build-dist.sh
+          ./scripts/build-dist.sh
 
       - name: Show distributions
         run: ls -lh dist/
