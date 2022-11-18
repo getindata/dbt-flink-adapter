@@ -1,7 +1,7 @@
 # For more on configuring pre-commit hooks (see https://pre-commit.com/)
 
 # TODO: remove global exclusion of tests when testing overhaul is complete
-exclude: "^tests/.*|^project_examples/.*|^scripts/.*|^envs/.*|^.github/.*"
+exclude: "^tests/.*|^project_example/.*|^scripts/.*|^envs/.*|^.github/.*"
 
 
 default_language_version:
