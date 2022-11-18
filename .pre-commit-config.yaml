@@ -32,11 +32,11 @@ repos:
     - "--target-version=py38"
     - "--check"
     - "--diff"
-- repo: https://gitlab.com/pycqa/flake8
-  rev: 4.0.1
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.2.0
   hooks:
   - id: flake8
-  - id: flake8
+    args: ['--ignore=E203,W503'] # see https://github.com/psf/black/issues/315 https://github.com/psf/black/issues/52
     alias: flake8-check
     stages: [manual]
 - repo: https://github.com/pre-commit/mirrors-mypy
