@@ -80,11 +80,9 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install python dependencies
-        run: |
-          pip install --user --upgrade pip
-          pip install --upgrade setuptools wheel twine check-wheel-contents
-          pip --version
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v4
+
       - name: Build distributions
         run: |
           chmod u+x ./scripts/build-dist.sh
@@ -96,6 +94,7 @@ jobs:
       - name: Check distribution descriptions
         run: |
           twine check dist/*
+
       - uses: actions/upload-artifact@v2
         with:
           name: dist
@@ -119,11 +118,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install python dependencies
-        run: |
-          pip install --user --upgrade pip
-          pip install --upgrade wheel
-          pip --version
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v4
+
       - uses: actions/download-artifact@v2
         with:
           name: dist
