@@ -103,12 +103,6 @@ jobs:
         with:
           name: dist
           path: dist/
-      - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_PASSWORD }}
-          verbose: true  # trace if the upload fails
   test-build:
     name: verify packages / python ${{ matrix.python-version }} / ${{ matrix.os }}
 
@@ -153,3 +147,14 @@ jobs:
       - name: Check source distributions
         run: |
           dbt --version
+  publish:
+    name: Publish python package to PyPi repository
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
+          verbose: true  # trace if the upload fails
