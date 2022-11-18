@@ -82,6 +82,8 @@ jobs:
 
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v4
+        with:
+          path: "dev-requirements.txt"
 
       - name: Build distributions
         run: |
@@ -120,6 +122,8 @@ jobs:
 
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v4
+        with:
+          path: "dev-requirements.txt"
 
       - uses: actions/download-artifact@v2
         with:
