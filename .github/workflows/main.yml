@@ -96,10 +96,6 @@ jobs:
       - name: Check distribution descriptions
         run: |
           twine check dist/*
-      - name: Check wheel contents
-        run: |
-          check-wheel-contents dist/dbt/*.whl --ignore W007,W008
-          check-wheel-contents dist/flink/*.whl --ignore W007,W008
       - uses: actions/upload-artifact@v2
         with:
           name: dist
