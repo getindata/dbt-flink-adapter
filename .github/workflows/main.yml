@@ -101,7 +101,12 @@ jobs:
         with:
           name: dist
           path: dist/
-
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
+          verbose: true  # trace if the upload fails
   test-build:
     name: verify packages / python ${{ matrix.python-version }} / ${{ matrix.os }}
 
