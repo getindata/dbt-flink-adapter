@@ -98,7 +98,8 @@ jobs:
           twine check dist/*
       - name: Check wheel contents
         run: |
-          check-wheel-contents dist/*.whl --ignore W007,W008
+          check-wheel-contents dist/dbt/*.whl --ignore W007,W008
+          check-wheel-contents dist/flink/*.whl --ignore W007,W008
       - uses: actions/upload-artifact@v2
         with:
           name: dist
@@ -149,7 +150,7 @@ jobs:
           dbt --version
   publish:
     name: Publish python package to PyPi repository
-    needs: build
+    needs: test-build
     runs-on: ubuntu-latest
     steps:
       - name: Publish distribution to PyPI
