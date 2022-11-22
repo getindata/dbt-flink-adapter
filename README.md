@@ -12,13 +12,13 @@ This is POC for DBT-FLINK adapter
 Before we start to play with dbt adapter, we need to setup Flink cluster with SqlGateway configured and running.
 To simplify that process we prepared Docker Compose configuration.
 
-### Install `dbt-flink` adapter
+### Install `dbt-flink-adapter`
 
 ```bash
 cd project_example
 python3 -m venv venv
 source venv/bin/activate
-pip install dbt-materialize
+pip install dbt-flink-adapter
 dbt --version
 ```
 `dbt-flink` should be enlisted among plugins
