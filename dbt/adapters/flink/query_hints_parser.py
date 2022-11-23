@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 
 import re
-from typing import Dict
+from typing import Dict, Optional
 
 
 class QueryHints:
-    fetch_max: int = None
-    fetch_timeout_ms: int = None
-    fetch_mode: str = None
+    fetch_max: Optional[int] = None
+    fetch_timeout_ms: Optional[int] = None
+    fetch_mode: Optional[str] = None
 
     def __init__(self, hints: Dict[str, str]):
         if "fetch_max" in hints:

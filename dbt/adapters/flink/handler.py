@@ -15,12 +15,12 @@ logger = AdapterLogger("Flink")
 
 class FlinkCursor:
     session: SqlGatewaySession
-    last_operation: SqlGatewayOperation = None
+    last_operation: Optional[SqlGatewayOperation] = None
     result_buffer: List[Tuple]
     buffered_results_counter: int = 0
-    last_result: SqlGatewayResult = None
-    last_query_hints: QueryHints = None
-    last_query_start_time: float = None
+    last_result: Optional[SqlGatewayResult] = None
+    last_query_hints: Optional[QueryHints] = None
+    last_query_start_time: Optional[float] = None
 
     def __init__(self, session):
         logger.info("Creating new cursor for session {}".format(session))
@@ -36,6 +36,9 @@ class FlinkCursor:
     def fetchall(self) -> Sequence[Tuple]:
         if self.last_result is None:
             self._buffer_results()
+
+        if self.last_result is None:
+            raise Exception("No result after fetch")
 
         while (
             not self.last_result.is_end_of_stream
@@ -106,10 +109,14 @@ class FlinkCursor:
         return binding
 
     @property
-    def description(self) -> Tuple[Tuple[str]]:
+    def description(self) -> Tuple[Tuple[str], ...]:
         if self.last_result is None:
             self._buffer_results()
         result = []
+
+        if self.last_result is None:
+            raise Exception("No result after fetch")
+
         for column_name in self.last_result.column_names:
             result.append((column_name,))
         return tuple(result)

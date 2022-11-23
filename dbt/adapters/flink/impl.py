@@ -1,18 +1,19 @@
-from typing import List, Optional, Any, Tuple
+from typing import List, Optional, Any, Tuple, Dict, Type
 
 import agate
 from dbt.adapters.base import (
-    BaseAdapter as adapter_cls,
+    BaseAdapter,
     BaseRelation,
     Column as BaseColumn,
     available,
+    PythonJobHelper,
 )
 
 from dbt.adapters.flink import FlinkConnectionManager
 from dbt.adapters.flink.relation import FlinkRelation
 
 
-class FlinkAdapter(adapter_cls):
+class FlinkAdapter(BaseAdapter):
     """
     Controls actual implmentation of adapter, and ability to override certain methods.
     """
