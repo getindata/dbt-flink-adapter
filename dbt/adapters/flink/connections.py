@@ -21,6 +21,8 @@ class FlinkCredentials(Credentials):
     Defines database specific credentials that get added to
     profiles.yml to connect to new adapter
     """
+    database = ""  # Not used
+    schema = ""  # Not used
 
     host: str
     port: int

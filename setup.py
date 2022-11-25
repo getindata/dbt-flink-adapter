@@ -50,7 +50,7 @@ def _get_dbt_core_version():
 
 
 package_name = "dbt-flink-adapter"
-package_version = "1.0.1"
+package_version = "1.0.2"
 # make sure this always matches dbt/adapters/{adapter}/__version__.py
 dbt_core_version = _get_dbt_core_version()
 description = """The Flink adapter plugin for dbt"""
