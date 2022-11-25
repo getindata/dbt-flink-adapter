@@ -9,7 +9,7 @@
   {% set connector_properties = config.get('connector_properties') %}
 
   {% set sql %}
-    create table {{ this.render() }} (
+    create table if not exists {{ this.render() }} (
         {%- for col_name in agate_table.column_names -%}
             {%- set inferred_type = adapter.convert_type(agate_table, loop.index0) -%}
             {%- set type = column_override.get(col_name, inferred_type) -%}

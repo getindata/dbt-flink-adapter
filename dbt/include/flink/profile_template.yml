@@ -2,19 +2,19 @@ fixed:
   type: flink
 prompts:
   host:
-    hint: "your host name"
+    hint: "Flink SQL Gateway host"
+    default: localhost
   port:
-    default: 5432
+    default: 8083
     type: "int"
   session_name:
     default: "test_session"
-  user:
-    hint: "dev username"
-  password:
-    hint: "dev password"
-    hide_input: true
-  dbname:
-    hint: "default database"
+  database:
+    hint: "Flink catalog"
+    default: default_catalog
+  schema:
+    hint: "Flink database"
+    default: default_database
   threads:
     hint: "1 or more"
     type: "int"

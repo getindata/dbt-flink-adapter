@@ -1,8 +1,12 @@
+from datetime import datetime
+import os
+from os.path import expanduser
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional, Any, Tuple
 
 import dbt.exceptions  # noqa
+import yaml
 from dbt.adapters.base import Credentials
 from dbt.adapters.sql import SQLConnectionManager  # type: ignore
 from dbt.contracts.connection import Connection
@@ -10,9 +14,12 @@ from dbt.events import AdapterLogger
 
 from dbt.adapters.flink.handler import FlinkHandler, FlinkCursor
 from flink.sqlgateway.client import FlinkSqlGatewayClient
+from flink.sqlgateway.config import SqlGatewayConfig
 from flink.sqlgateway.session import SqlGatewaySession
 
 logger = AdapterLogger("Flink")
+
+SESSION_FILE_PATH = expanduser("~") + "/.dbt/flink-session.yml"
 
 
 @dataclass
@@ -22,12 +29,10 @@ class FlinkCredentials(Credentials):
     profiles.yml to connect to new adapter
     """
 
-    database = ""  # Not used
-    schema = ""  # Not used
-
     host: str
     port: int
     session_name: str
+    session_idle_timeout_s: int = 10 * 60
 
     _ALIASES = {"session": "session_name"}
 
@@ -80,21 +85,58 @@ class FlinkConnectionManager(SQLConnectionManager):
 
         credentials: FlinkCredentials = connection.credentials
         try:
-            session: SqlGatewaySession = FlinkSqlGatewayClient.create_session(
-                host=credentials.host,
-                port=credentials.port,
-                session_name=credentials.session_name,
-            )
+            session = FlinkConnectionManager._read_session_handle(credentials)
+            if not session:
+                session = FlinkSqlGatewayClient.create_session(
+                    host=credentials.host,
+                    port=credentials.port,
+                    session_name=credentials.session_name,
+                )
+                logger.info(f"Session created: {session.session_handle}")
+                FlinkConnectionManager._store_session_handle(session)
 
             connection.state = "open"
             connection.handle = FlinkHandler(session)
 
-            logger.info(f"Session created: {session.session_handle}")
         except Exception as e:
             logger.error("Error during creating session {}".format(str(e)))
             raise e
 
         return connection
+
+    @classmethod
+    def _read_session_handle(cls, credentials: FlinkCredentials) -> Optional[SqlGatewaySession]:
+        if os.path.isfile(SESSION_FILE_PATH):
+            with open(SESSION_FILE_PATH, "r+") as file:
+                session_file = yaml.load(file, Loader=yaml.FullLoader)
+                session_timestamp = datetime.strptime(
+                    session_file["timestamp"], "%Y-%m-%dT%H:%M:%S"
+                )
+
+                if (
+                    datetime.now() - session_timestamp
+                ).seconds > credentials.session_idle_timeout_s:
+                    logger.info("Stored session has timeout.")
+                    return None
+
+                logger.info(
+                    f"Restored session from file. Session handle: {session_file['session_handle']}"
+                )
+
+                return SqlGatewaySession(
+                    SqlGatewayConfig(credentials.host, credentials.port, credentials.session_name),
+                    session_file["session_handle"],
+                )
+        return None
+
+    @classmethod
+    def _store_session_handle(self, session: SqlGatewaySession):
+        content = {
+            "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "session_handle": session.session_handle,
+        }
+        with open(SESSION_FILE_PATH, "w+") as file:
+            yaml.dump(content, file)
 
     @classmethod
     def get_response(cls, cursor: FlinkCursor):
