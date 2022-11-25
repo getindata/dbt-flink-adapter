@@ -25,7 +25,7 @@
   {{ sql_header if sql_header is not none }}
 
   create {% if temporary: -%}temporary{%- endif %} table
-    {{ relation.include(database=(not temporary), schema=(not temporary)) }}
+    {{ this.render() }}
   with (
     {% for property_name in connector_properties %} '{{ property_name }}' = '{{ connector_properties[property_name] }}'{% if not loop.last %},{% endif %}
     {% endfor %}
