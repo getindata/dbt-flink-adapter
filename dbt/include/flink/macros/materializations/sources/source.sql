@@ -5,7 +5,7 @@
 {% set connector_properties = node.config.get('connector_properties') %}
 {% set table_column_ids = node.columns.keys() %}
 CREATE TABLE IF NOT EXISTS {{ node.identifier }} (
-{% for column_id in table_column_ids %} `{{ node.columns[column_id]["name"] }}`: {{ node.columns[column_id]["data_type"] }}{% if not loop.last %},{% endif %}
+{% for column_id in table_column_ids %} `{{ node.columns[column_id]["name"] }}` {{ node.columns[column_id]["data_type"] }}{% if not loop.last %},{% endif %}
 {% endfor %}
 )
 with (
