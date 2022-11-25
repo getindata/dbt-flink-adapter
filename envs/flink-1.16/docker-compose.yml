@@ -1,7 +1,7 @@
 version: '2'
 services:
   jobmanager:
-    image: ghcr.io/apache/flink-docker:1.16-SNAPSHOT-scala_2.12-java11-debian
+    image: flink:1.16.0-scala_2.12-java11
     command: jobmanager
     ports:
       - "8081:8081"
@@ -11,10 +11,10 @@ services:
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 10
     volumes:
-      - ./opt/flink-sql-connector-kafka-1.16.1.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.1.jar
+      - ./opt/flink-sql-connector-kafka-1.16.0.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.0.jar
 
   taskmanager:
-    image: ghcr.io/apache/flink-docker:1.16-SNAPSHOT-scala_2.12-java11-debian
+    image: flink:1.16.0-scala_2.12-java11
     command: taskmanager
     depends_on:
       - jobmanager
@@ -24,10 +24,10 @@ services:
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 10
     volumes:
-      - ./opt/flink-sql-connector-kafka-1.16.1.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.1.jar
+      - ./opt/flink-sql-connector-kafka-1.16.0.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.0.jar
 
   sql-gateway:
-    image: ghcr.io/apache/flink-docker:1.16-SNAPSHOT-scala_2.12-java11-debian
+    image: flink:1.16.0-scala_2.12-java11
     ports:
       - "8083:8083"
     entrypoint: /bin/sh
@@ -45,7 +45,7 @@ services:
         rest.address: jobmanager
         sql-gateway.endpoint.rest.address: 0.0.0.0
     volumes:
-      - ./opt/flink-sql-connector-kafka-1.16.1.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.1.jar
+      - ./opt/flink-sql-connector-kafka-1.16.0.jar:/opt/flink/lib/flink-sql-connector-kafka-1.16.0.jar
 
 networks:
   default:
