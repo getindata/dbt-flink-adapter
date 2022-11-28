@@ -4,8 +4,9 @@
 {% set flink_source_sql %}
 {% set connector_properties = node.config.get('connector_properties') %}
 {% set watermark_properties = node.config.get('watermark') %}
+{% set type = node.config.get('type', None) %}
 {% set table_column_ids = node.columns.keys() %}
-CREATE TABLE IF NOT EXISTS {{ node.identifier }} (
+CREATE TABLE IF NOT EXISTS {{ node.identifier }} {% if type %}/** mode('{{type}}')*/{% endif %} (
 {% for column_id in table_column_ids %} `{{ node.columns[column_id]["name"] }}` {{ node.columns[column_id]["data_type"] }}{% if not loop.last %},{% endif %}
 {% endfor %}
 {% if watermark_properties %}, WATERMARK FOR {{ watermark_properties['column']}} AS {{ watermark_properties['strategy']}} {% endif %}

@@ -69,6 +69,10 @@ TODO
 
 #### Source
 
+##### Type
+
+Flink supports sources in batch and streaming mode, use `type` to select what execution environment will be used during source creation.
+
 ##### Watermark
 
 To provide watermark pass `column` and `strategy` reference under `watermark` key in config.
@@ -80,6 +84,7 @@ sources:
     tables:
       - name: clickstream
         config:
+          type: streaming
           connector_properties:
             ...
           watermark:

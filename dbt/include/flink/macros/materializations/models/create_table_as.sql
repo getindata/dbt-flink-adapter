@@ -19,6 +19,7 @@
 {%- endmacro %}
 
 {% macro flink__create_table_as(temporary, relation, sql) -%}
+  {% set type = config.get('type', None) %}
   {%- set sql_header = config.get('sql_header', none) -%}
   {% set connector_properties = config.get('connector_properties') %}
 
@@ -26,6 +27,7 @@
 
   create {% if temporary: -%}temporary{%- endif %} table
     {{ this.render() }}
+    {% if type %}/** mode('{{type}}')*/{% endif %}
   with (
     {% for property_name in connector_properties %} '{{ property_name }}' = '{{ connector_properties[property_name] }}'{% if not loop.last %},{% endif %}
     {% endfor %}

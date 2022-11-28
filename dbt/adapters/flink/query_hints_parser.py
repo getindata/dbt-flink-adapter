@@ -7,15 +7,15 @@ from typing import Dict, Optional
 class QueryHints:
     fetch_max: Optional[int] = None
     fetch_timeout_ms: Optional[int] = None
-    fetch_mode: Optional[str] = None
+    mode: Optional[str] = None
 
     def __init__(self, hints: Dict[str, str]):
         if "fetch_max" in hints:
             self.fetch_max = int(hints["fetch_max"])
         if "fetch_timeout_ms" in hints:
             self.fetch_timeout_ms = int(hints["fetch_timeout_ms"])
-        if "fetch_mode" in hints:
-            self.fetch_mode = hints["fetch_mode"]
+        if "mode" in hints:
+            self.mode = hints["mode"]
 
 
 class QueryHintsParser:
