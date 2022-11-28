@@ -62,3 +62,42 @@ FLink SQL tables should be created on Flink cluster
 ```bash
 docker compose stop
 ```
+
+### Creating DBT model
+
+TODO
+
+#### Source
+
+##### Watermark
+
+To provide watermark pass `column` and `strategy` reference under `watermark` key in config.
+
+Example:
+```yaml
+sources:
+  - name: my_source
+    tables:
+      - name: clickstream
+        config:
+          connector_properties:
+            ...
+          watermark:
+            column: event_timestamp
+            strategy: event_timestamp
+        columns:
+          - name: event_timestamp
+            data_type: TIMESTAMP(3)
+```
+
+SQL passed to Flink will look like:
+```sql
+CREATE TABLE IF NOT EXISTS my_source (
+    `<column>` TIMESTAMP(3),
+    WATERMARK FOR <column> AS <strategy>
+) WITH (
+    ...
+)
+```
+
+Please refer to Flink documentation about possible strategies: [flink-doc/watermark](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/create/#watermark)
