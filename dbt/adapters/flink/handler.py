@@ -55,7 +55,7 @@ class FlinkCursor:
         return result
 
     def _close(self):
-        if self.last_query_hints.fetch_mode == "streaming":
+        if self.last_query_hints.mode == "streaming":
             self.last_operation.close()
 
     def _buffered_fetch_max(self):
@@ -142,8 +142,8 @@ class FlinkCursor:
 
     def _set_query_mode(self):
         runtime_mode = "batch"
-        if self.last_query_hints.fetch_mode is not None:
-            runtime_mode = self.last_query_hints.fetch_mode
+        if self.last_query_hints.mode is not None:
+            runtime_mode = self.last_query_hints.mode
         logger.info("Setting 'execution.runtime-mode' to '{}'".format(runtime_mode))
         FlinkSqlGatewayClient.execute_statement(
             self.session, "SET 'execution.runtime-mode' = '{}'".format(runtime_mode)
