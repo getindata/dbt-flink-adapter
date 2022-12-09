@@ -1,4 +1,4 @@
-from dbt.adapters.flink.query_hints_parser import QueryHintsParser
+from dbt.adapters.flink.query_hints_parser import QueryHintsParser, QueryMode
 
 
 class TestQueryHintsParser:
@@ -8,13 +8,27 @@ class TestQueryHintsParser:
         assert hints.fetch_timeout_ms is None
         assert hints.fetch_max is None
         assert hints.mode is None
+        assert hints.test_query is False
 
-    def test_single_hint(self):
+    def test_fetch_timeout(self):
+        sql = "select /** fetch_timeout_ms(1000) */ from input"
+        hints = QueryHintsParser.parse(sql)
+        assert hints.fetch_timeout_ms == 1000
+
+    def test_fetch_max(self):
         sql = "select /** fetch_max(10) */ from input"
         hints = QueryHintsParser.parse(sql)
-        assert hints.fetch_timeout_ms is None
         assert hints.fetch_max == 10
-        assert hints.mode is None
+
+    def test_mode(self):
+        sql = "select /** mode('streaming') */ from input"
+        hints = QueryHintsParser.parse(sql)
+        assert hints.mode == QueryMode.STREAMING
+
+    def test_test_query(self):
+        sql = "select /** test_query('true') */ from input"
+        hints = QueryHintsParser.parse(sql)
+        assert hints.test_query is True
 
     def test_multiple_hints_in_single_comment(self):
         sql = "select /** fetch_max(10) fetch_timeout_ms(1000) */ from input"
@@ -28,4 +42,4 @@ class TestQueryHintsParser:
         hints = QueryHintsParser.parse(sql)
         assert hints.fetch_timeout_ms is None
         assert hints.fetch_max == 10
-        assert hints.mode == "streaming"
+        assert hints.mode == QueryMode.STREAMING

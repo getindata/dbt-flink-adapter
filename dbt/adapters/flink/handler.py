@@ -4,7 +4,7 @@ from typing import Sequence, Tuple, Optional, Any, List
 
 from dbt.events import AdapterLogger
 
-from dbt.adapters.flink.query_hints_parser import QueryHints, QueryHintsParser
+from dbt.adapters.flink.query_hints_parser import QueryHints, QueryHintsParser, QueryMode
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 from flink.sqlgateway.operation import SqlGatewayOperation
 from flink.sqlgateway.result_parser import SqlGatewayResult
@@ -19,7 +19,7 @@ class FlinkCursor:
     result_buffer: List[Tuple]
     buffered_results_counter: int = 0
     last_result: Optional[SqlGatewayResult] = None
-    last_query_hints: Optional[QueryHints] = None
+    last_query_hints: QueryHints = QueryHints()
     last_query_start_time: Optional[float] = None
 
     def __init__(self, session):
@@ -49,13 +49,24 @@ class FlinkCursor:
             self._buffer_results()
 
         result = self.result_buffer
-        logger.info("Fetched results: {}".format(result))
+        logger.info("Fetched results from Flink: {}".format(result))
+        if self.last_query_hints.test_query is True:
+            result = self._handle_test_query(result)
+        logger.info("Returned results from adapter: {}".format(result))
         self._close()
         self._clean()
         return result
 
+    def _handle_test_query(self, result: List[Tuple]) -> List[Tuple]:
+        if self.last_query_hints.mode == QueryMode.STREAMING:
+            if len(result) > 0:
+                return [result[-1]]
+            else:
+                return [(0, False, False)]
+        return result
+
     def _close(self):
-        if self.last_query_hints.mode == "streaming":
+        if self.last_query_hints.mode == QueryMode.STREAMING:
             self.last_operation.close()
 
     def _buffered_fetch_max(self):
@@ -81,11 +92,11 @@ class FlinkCursor:
         return None
 
     def execute(self, sql: str, bindings: Optional[Sequence[Any]] = None) -> None:
-        logger.info('Preparing statement "{}"'.format(sql))
+        logger.debug('Preparing statement "{}"'.format(sql))
         if bindings is not None:
             sql = sql.format(*[self._convert_binding(binding) for binding in bindings])
         logger.info('Executing statement "{}"'.format(sql))
-        self.last_query_hints = QueryHintsParser.parse(sql)
+        self.last_query_hints: QueryHints = QueryHintsParser.parse(sql)
         self._set_query_mode()
         operation_handle = FlinkSqlGatewayClient.execute_statement(self.session, sql)
         status = self._wait_till_finished(operation_handle)
@@ -143,7 +154,7 @@ class FlinkCursor:
     def _set_query_mode(self):
         runtime_mode = "batch"
         if self.last_query_hints.mode is not None:
-            runtime_mode = self.last_query_hints.mode
+            runtime_mode = self.last_query_hints.mode.value
         logger.info("Setting 'execution.runtime-mode' to '{}'".format(runtime_mode))
         FlinkSqlGatewayClient.execute_statement(
             self.session, "SET 'execution.runtime-mode' = '{}'".format(runtime_mode)
