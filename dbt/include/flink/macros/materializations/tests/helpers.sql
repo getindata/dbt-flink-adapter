@@ -3,7 +3,7 @@
 {%- endmacro %}
 
 {% macro default__get_test_sql(main_sql, fail_calc, warn_if, error_if, limit) -%}
-select
+select /** test_query('true') */
     {{ fail_calc }} as failures,
     {{ fail_calc }} <> 0 as should_warn,
     {{ fail_calc }} <> 0 as should_error

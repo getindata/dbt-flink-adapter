@@ -1,21 +1,30 @@
-from dataclasses import dataclass
-
 import re
+from enum import Enum
 from typing import Dict, Optional
+
+
+class QueryMode(Enum):
+    BATCH = "batch"
+    STREAMING = "streaming"
 
 
 class QueryHints:
     fetch_max: Optional[int] = None
     fetch_timeout_ms: Optional[int] = None
-    mode: Optional[str] = None
+    mode: Optional[QueryMode] = None
+    test_query: bool = False
 
-    def __init__(self, hints: Dict[str, str]):
+    def __init__(self, hints=None):
+        if hints is None:
+            hints = {}
         if "fetch_max" in hints:
             self.fetch_max = int(hints["fetch_max"])
         if "fetch_timeout_ms" in hints:
             self.fetch_timeout_ms = int(hints["fetch_timeout_ms"])
         if "mode" in hints:
-            self.mode = hints["mode"]
+            self.mode = QueryMode(hints["mode"].lower())
+        if "test_query" in hints:
+            self.test_query = bool(hints["test_query"])
 
 
 class QueryHintsParser:
