@@ -1,0 +1,69 @@
+[tool.poetry]
+name = "dbt-flink-adapter"
+version = "1.3.5"
+description = "The Flink adapter plugin for dbt"
+license = "Apache"
+authors = [
+    "Getindata <office@getindata.com>"
+]
+readme = "README.md"
+repository = "https://github.com/getindata/flink-dbt-adapter"
+keywords = ["flink", "dbt"]
+packages = [
+    { include = "dbt" },
+    { include = "flink" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7.2"
+dbt-core = "~1.3.1"
+requests = "<3.0.0"
+
+[tool.poetry.dev-dependencies]
+black = "~22.3.0"
+bumpversion = "*"
+flake8 = "*"
+flaky = "*"
+freezegun = "~0.3.12"
+ipdb = "*"
+pip-tools = "*"
+pre-commit = "*"
+pyright = ">=1.1"
+pytest = "^5.2"
+pytest-dotenv = "*"
+pytest-logbook = "*"
+pytest-csv = "*"
+pytest-xdist = "*"
+pytz = "*"
+tox = ">=3.13"
+twine = "*"
+wheel = "*"
+pyyaml = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+include = ["./dbt", "./flink"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "*/.venv",
+    "build",
+    "./typings"
+]
+stubPath = "./typings"
+venv = ".venv"
+venvPath = "./"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = true
+reportPrivateImportUsage = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownLambdaType = false
+strictListInference = true
+strictDictionaryInference = true
+strictParameterNoneValue = true
+strictSetInference = true
