@@ -133,3 +133,6 @@ dmypy.json
 
 # Logs
 logs/
+
+# Pyright type checker
+typings/
