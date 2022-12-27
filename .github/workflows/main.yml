@@ -64,6 +64,7 @@ jobs:
 
       - name: Run pre-commit hooks
         run: |
+          poetry run pyright --createstub "agate"
           poetry run pre-commit run --all-files
 
   build:
@@ -103,7 +104,9 @@ jobs:
   test-build:
     name: verify packages / python ${{ matrix.python-version }} / ${{ matrix.os }}
 
-    needs: build
+    needs:
+      - build
+      - code-quality
 
     runs-on: ${{ matrix.os }}
 
