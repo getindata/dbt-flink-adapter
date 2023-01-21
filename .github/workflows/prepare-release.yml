@@ -1,0 +1,57 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_part:
+        description: The part of the version to update (patch, minor or major)
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        required: true
+        default: 'patch'
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Bump the version number  # bump2version is a maintained fork of original bumpversion
+        id: bump_version
+        run: |
+          pip install bump2version
+          bump2version ${{ github.event.inputs.version_part }}
+          echo "::set-output name=package_version::$(cat setup.cfg | grep -A 1 "\[bumpversion\]" | grep -Po  '\d+\.\d+\.\d+')"
+      - name: Update the CHANGELOG according to 'Keep a Changelog' guidelines
+        uses: thomaseizinger/keep-a-changelog-new-release@v1
+        with:
+          version: ${{ steps.bump_version.outputs.package_version }}
+      - name: Create a new release branch
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout -b release-${{ steps.bump_version.outputs.package_version }}
+          git push -u origin release-${{ steps.bump_version.outputs.package_version }}
+      - name: Commit the changes
+        run: |
+          git commit -am "FIX #${{ steps.open_pr.outputs.pull_request_number }}  - Bump version and CHANGELOG for release ${{ steps.bump_version.outputs.package_version }}"
+          git push
+      - name: Open a PR to merge the release to main
+        id: open_pr
+        uses: vsoch/pull-request-action@1.0.12
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST_BRANCH: main
+          PULL_REQUEST_FROM_BRANCH: release-${{ steps.bump_version.outputs.package_version }}
+          PULL_REQUEST_TITLE: "Release ${{ steps.bump_version.outputs.package_version }}"
+          PULL_REQUEST_BODY: "Bump version and CHANGELOG for next release."
+          PULL_REQUEST_ASSIGNEES: "gliter"
