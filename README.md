@@ -103,8 +103,8 @@ sources:
           type: streaming
           connector_properties:
             connector: 'kafka'
-            'properties.bootstrap.servers': 'kafka:29092'
-            'topic': 'clickstream'
+            properties.bootstrap.servers: 'kafka:29092'
+            topic: 'clickstream'
           watermark:
             column: event_timestamp
             strategy: event_timestamp
@@ -141,8 +141,8 @@ models:
       type: streaming
       connector_properties:
         connector: 'kafka'
-        'properties.bootstrap.servers': 'kafka:29092'
-        'topic': 'some-output'
+        properties.bootstrap.servers: 'kafka:29092'
+        topic: 'some-output'
 ```
 
 `my_model.sql`
@@ -168,8 +168,8 @@ seeds:
     config:
       connector_properties:
         connector: 'kafka'
-        'properties.bootstrap.servers': 'kafka:29092'
-        'topic': 'clickstream'
+        properties.bootstrap.servers: 'kafka:29092'
+        topic: 'clickstream'
 ```
 
 ### Tests
@@ -192,6 +192,78 @@ where
 ```
 
 In this example we are telling dbt-flink-adapter to fetch for 5 seconds in streaming mode.
+
+### dbt_project.yml
+
+You can extract common configurations of your model and sources into `dbt_project.yml` [dbt-docs/general-configuration](https://docs.getdbt.com/reference/model-configs#general-configurations).
+If you define the same kay in `dbt_project.yml` and in your model or source dbt will always override entire key value.
+In case you wish to extract some keys from under `connector_properties` you can specify configuration under `default_connector_properties`
+which will get merged with `connection_properies`.
+
+#### Example
+
+`dbt_project.yml`
+
+```yaml
+models:
+  example1:
+    +materialized: table
+    +type: streaming
+    +default_connector_properties:
+      connector: 'kafka'
+      properties.bootstrap.servers: 'kafka:29092'
+
+sources:
+  example1:
+    +type: streaming
+    +default_connector_properties:
+      connector: 'kafka'
+      properties.bootstrap.servers: 'kafka:29092'
+
+seeds:
+  example1:
+    +default_connector_properties:
+      connector: 'kafka'
+      properties.bootstrap.servers: 'kafka:29092'
+```
+
+`models.yml`
+
+```yaml
+models:
+  - name: my_model
+    config:
+      connector_properties:
+        topic: 'some-output'
+```
+
+`sources.yml`
+
+```yaml
+sources:
+  - name: my_source
+    tables:
+      - name: clickstream
+        config:
+          connector_properties:
+            topic: 'clickstream'
+          watermark:
+            column: event_timestamp
+            strategy: event_timestamp
+        columns:
+          - name: event_timestamp
+            data_type: TIMESTAMP(3)
+```
+
+`seeds.yml`
+
+```yaml
+seeds:
+  - name: clickstream
+    config:
+      connector_properties:
+        topic: 'clickstream'
+```
 
 ## Sessions
 

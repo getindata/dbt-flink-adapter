@@ -17,7 +17,7 @@
   {%- set sql_header = config.get('sql_header', none) -%}
 
   {{ sql_header if sql_header is not none }}
-  create view /*TODO {{ relation }}*/ {{ this.render() }} {% if type %}/** mode('{{type}}')*/{% endif %} as (
+  create view if not exists /*TODO {{ relation }}*/ {{ this.render() }} {% if type %}/** mode('{{type}}')*/{% endif %} as (
     {{ sql }}
   );
 {%- endmacro %}

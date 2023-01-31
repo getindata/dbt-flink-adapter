@@ -6,7 +6,8 @@
 {% macro default__create_csv_table(model, agate_table) %}
   {%- set column_override = model['config'].get('column_types', {}) -%}
   {%- set quote_seed_column = model['config'].get('quote_columns', None) -%}
-  {% set connector_properties = config.get('connector_properties') %}
+  {% set connector_properties = config.get('default_connector_properties', {}) %}
+  {% set _dummy = connector_properties.update(config.get('connector_properties', {})) %}
 
   {% set sql %}
     create table if not exists {{ this.render() }} (
