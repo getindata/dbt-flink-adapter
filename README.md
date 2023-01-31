@@ -1,4 +1,4 @@
-# Flink dbt Adapter
+# dbt Flink Adapter
 
 [![Python Version](https://img.shields.io/badge/python-3.8-blue.svg)](https://github.com/getindata/doge-datagen)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/dbt-flink-adapter.svg)](https://badge.fury.io/py/dbt-flink-adapter)
 [![Downloads](https://pepy.tech/badge/dbt-flink-adapter)](https://pepy.tech/badge/dbt-flink-adapter)
 
-This is an MVP of Flink DBT Adapter. It allows materializing of dbt models as Flink cluster streaming pipelines and batch jobs.
+This is an MVP of dbt Flink Adapter. It allows materializing of dbt models as Flink cluster streaming pipelines and batch jobs.
 
 ## Prerequisites
 
@@ -275,9 +275,9 @@ Session handler is stored in `~/.dbt/flink-session.yml` file, if you want to for
 
 ## Releasing
 
-To release new version first execute [prepare-release](https://github.com/getindata/flink-dbt-adapter/actions/workflows/prepare-release.yml) action.
+To release new version first execute [prepare-release](https://github.com/getindata/dbt-flink-adapter/actions/workflows/prepare-release.yml) action.
 Please keep in mind that major and minor version have to be exactly the same as major and minor version of dbt-core.
 
 This action will create a release branch with bumped version and changelog prepared for release. It will also open a Pull Request to main branch if everything is ok with it - merge it.
 
-Next execute [publish](https://github.com/getindata/flink-dbt-adapter/actions/workflows/publish.yml) on branch that was just created by prepare-release action.
+Next execute [publish](https://github.com/getindata/dbt-flink-adapter/actions/workflows/publish.yml) on branch that was just created by prepare-release action.

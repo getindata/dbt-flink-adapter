@@ -63,7 +63,7 @@ setup(
     long_description_content_type="text/markdown",
     author="GetInData",
     author_email="office@getindata.com",
-    url="https://github.com/getindata/flink-dbt-adapter",
+    url="https://github.com/getindata/dbt-flink-adapter",
     packages=find_namespace_packages(include=["dbt", "dbt.*", "flink", "flink.*"]),
     include_package_data=True,
     install_requires=[
