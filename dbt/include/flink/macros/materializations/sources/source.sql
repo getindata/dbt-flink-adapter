@@ -2,7 +2,8 @@
 {% if execute %}
 {% for node in graph.sources.values() -%}
 {% set flink_source_sql %}
-{% set connector_properties = node.config.get('connector_properties') %}
+{% set connector_properties = node.config.get('default_connector_properties', {}) %}
+{% set _dummy = connector_properties.update(node.config.get('connector_properties', {})) %}
 {% set watermark_properties = node.config.get('watermark') %}
 {% set type = node.config.get('type', None) %}
 {% set table_column_ids = node.columns.keys() %}

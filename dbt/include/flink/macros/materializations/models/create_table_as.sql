@@ -21,7 +21,8 @@
 {% macro flink__create_table_as(temporary, relation, sql) -%}
   {% set type = config.get('type', None) %}
   {%- set sql_header = config.get('sql_header', none) -%}
-  {% set connector_properties = config.get('connector_properties') %}
+  {% set connector_properties = config.get('default_connector_properties', {}) %}
+  {% set _dummy = connector_properties.update(config.get('connector_properties', {})) %}
 
   {{ sql_header if sql_header is not none }}
 
