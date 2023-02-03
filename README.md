@@ -1,6 +1,6 @@
 # dbt Flink Adapter
 
-[![Python Version](https://img.shields.io/badge/python-3.8-blue.svg)](https://github.com/getindata/doge-datagen)
+[![Python Version](https://img.shields.io/badge/python-3.8-blue.svg)](https://github.com/getindata/dbt-flink-adapter)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![SemVer](https://img.shields.io/badge/semver-2.0.0-green)](https://semver.org/)
 [![PyPI version](https://badge.fury.io/py/dbt-flink-adapter.svg)](https://badge.fury.io/py/dbt-flink-adapter)

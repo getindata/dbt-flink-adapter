@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Fix link to repository in README.md
+
 ## [1.3.6] - 2023-01-31
 
 -   [#44](https://github.com/getindata/dbt-flink-adapter/issues/44) Add possibility to extract default connector properties to dbt_project.yml
