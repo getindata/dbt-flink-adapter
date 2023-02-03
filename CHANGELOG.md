@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-- Fix link to repository in README.md
+## [1.3.7] - 2023-02-03
+
+-   Fix link to repository in README.md
 
 ## [1.3.6] - 2023-01-31
 
@@ -13,7 +15,9 @@
 -   Changelog added
 -   Implement handling for dbt test in streaming cases.
 
-[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.6...HEAD
+[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.7...HEAD
+
+[1.3.7]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.6...1.3.7
 
 [1.3.6]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.5...1.3.6
 
