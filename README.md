@@ -86,6 +86,12 @@ dbt-flink-adapter will read `config/connector_properties` key and use it as conn
 
 Flink supports sources in batch and streaming mode, use `type` to select what execution environment will be used during source creation.
 
+#### column type
+current has these values, refer to [flink-doc/create-table](https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/dev/table/sql/create/#create-table)
+- physical (default)
+- metadata
+- computed
+
 #### Watermark
 
 To provide watermark pass `column` and `strategy` reference under `watermark` key in config.
@@ -109,14 +115,26 @@ sources:
             column: event_timestamp
             strategy: event_timestamp
         columns:
+          - name: id
+            data_type: BIGINT
+          - name: id2
+            column_type: computed
+            expression: id + 1
           - name: event_timestamp
             data_type: TIMESTAMP(3)
+          - name: ts2
+            column_type: metadata
+            data_type: TIMESTAMP(3)
+            expression: timestamp
 ```
 
 SQL passed to Flink will look like:
 ```sql
 CREATE TABLE IF NOT EXISTS my_source (
+  `id` BIGINT,
+  `id2` AS id + 1,
   `event_timestamp` TIMESTAMP(3),
+  `ts2` TIMESTAMP(3) METADATA  FROM 'timestamp',
   WATERMARK FOR event_timestamp AS event_timestamp
 ) WITH (
   'connector' = 'kafka',
