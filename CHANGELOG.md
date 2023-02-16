@@ -2,10 +2,11 @@
 
 ## [Unreleased]
 
+-   Support computed / metadata column
+
 ## [1.3.7] - 2023-02-03
 
 -   Fix link to repository in README.md
--   support computed / metadata column
 
 ## [1.3.6] - 2023-01-31
 
