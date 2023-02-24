@@ -8,6 +8,8 @@
 
 This is an MVP of dbt Flink Adapter. It allows materializing of dbt models as Flink cluster streaming pipelines and batch jobs.
 
+Check out our [blogpost about dbt-flink-adapter with tutorial](https://getindata.com/blog/dbt-run-real-time-analytics-on-apache-flink-announcing-the-dbt-flink-adapter/)
+
 ## Prerequisites
 
 * Flink 1.16+ with Flink SQL Gateway
