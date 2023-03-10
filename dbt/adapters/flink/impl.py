@@ -56,7 +56,12 @@ class FlinkAdapter(BaseAdapter):
         pass
 
     def drop_relation(self, relation: BaseRelation) -> None:
-        pass
+        if not relation.identifier:
+            raise RuntimeError(f"drop relation, but relation name not provided")
+        if (not relation.is_table) and (not relation.is_view):
+            raise RuntimeError(f"drop relation, not support type {relation.type}")
+        sql = f"drop {relation.type} if exists {str(relation)}"
+        self.connections.execute_ddl_wait_done(sql)
 
     def drop_schema(self, relation: BaseRelation):
         pass
@@ -72,10 +77,39 @@ class FlinkAdapter(BaseAdapter):
         return False  # TODO
 
     def list_relations_without_caching(self, schema_relation: BaseRelation) -> List[BaseRelation]:
-        return []  # TODO
+        database = schema_relation.path.database
+        if not database:
+            raise RuntimeError("database(flink catalog) should not be empty")
+
+        schema = schema_relation.schema
+        if not schema:
+            raise RuntimeError("schema(flink database) should not be empty")
+
+        tables, views = self.connections.show_relations(database, schema)
+
+        relations = []
+        if schema_relation.type is None or schema_relation.type == FlinkRelation.Table:
+            for t in tables:
+                table = self.Relation.create(database, schema, t, FlinkRelation.Table)
+                relations.append(table)
+        if schema_relation.type is None or schema_relation.type == FlinkRelation.View:
+            for v in views:
+                view = self.Relation.create(database, schema, v, FlinkRelation.View)
+                relations.append(view)
+
+        return relations
+
+    def get_relation(self, database: str, schema: str, identifier: str) -> Optional[BaseRelation]:
+        tables, views = self.connections.show_relations(database, schema)
+        rel = None
+        if identifier in tables:
+            rel = self.Relation.create(database, schema, identifier, FlinkRelation.Table)
+        elif identifier in views:
+            rel = self.Relation.create(database, schema, identifier, FlinkRelation.View)
+        return rel
 
     def list_schemas(self, database: str) -> List[str]:
-        return []  # TODO
+        return self.connections.show_catalogs()
 
     @classmethod
     def quote(cls, identifier: str) -> str:

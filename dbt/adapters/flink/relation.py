@@ -11,8 +11,8 @@ class FlinkQuotePolicy(Policy):
 
 @dataclass
 class FlinkIncludePolicy(Policy):
-    database: bool = False
-    schema: bool = False
+    database: bool = True
+    schema: bool = True
     identifier: bool = True
 
 

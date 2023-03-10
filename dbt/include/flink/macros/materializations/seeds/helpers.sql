@@ -48,6 +48,12 @@
     {{ return(sql) }}
 {% endmacro %}
 
+{% macro flink__reset_csv_table(model, full_refresh, old_relation, agate_table) %}
+    {% set sql = "" %}
+    {{ adapter.drop_relation(old_relation) }}
+    {% set sql = create_csv_table(model, agate_table) %}
+    {{ return(sql) }}
+{% endmacro %}
 
 {% macro get_csv_sql(create_or_truncate_sql, insert_sql) %}
     {{ adapter.dispatch('get_csv_sql', 'dbt')(create_or_truncate_sql, insert_sql) }}
