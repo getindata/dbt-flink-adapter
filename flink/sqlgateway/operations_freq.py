@@ -84,10 +84,8 @@ class FrequentSyncOperation:
         views = show views in catalog.database
         tables = show tables in catalog.database - views
         """
-        views = FrequentSyncOperation.show_views(session)
+        views = FrequentSyncOperation.show_views(session, catalog, database)
 
-        if catalog is None or database is None:
-            raise RuntimeError("show table require at least catalog or database")
         if catalog is None:
             if database is None:
                 sql = "show tables"
