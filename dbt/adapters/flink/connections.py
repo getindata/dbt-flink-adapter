@@ -117,7 +117,7 @@ class FlinkConnectionManager(SQLConnectionManager):
                 )
 
                 if (
-                    datetime.now() - session_timestamp
+                        datetime.now() - session_timestamp
                 ).seconds > credentials.session_idle_timeout_s:
                     logger.info("Stored session has timeout.")
                     return None
@@ -182,7 +182,7 @@ class FlinkConnectionManager(SQLConnectionManager):
     def show_databases(self, catalog: str) -> List[str]:
         return SchemaOperation.show_databases(self.current_session(), catalog)
 
-    def show_relations(self, catalog: str, database: str) -> (List[str], List[str]):
+    def show_relations(self, catalog: str, database: str) -> Tuple[List[str], List[str]]:
         tables, views = SchemaOperation.show_relations(self.current_session(), catalog, database)
         return tables, views
 

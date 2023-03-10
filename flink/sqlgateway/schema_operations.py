@@ -1,5 +1,5 @@
 import time
-from typing import List
+from typing import List, Tuple
 
 from flink.sqlgateway.operation import SqlGatewayOperation
 from flink.sqlgateway.result_parser import SqlGatewayResult
@@ -15,6 +15,7 @@ sql_show_current_catalog = "show current catalog"
 sql_show_databases = "show databases"
 sql_show_current_database = "show current database"
 sql_show_tables = "show tables"
+sql_show_views = "show views"
 
 pull_interval_s = 0.1
 
@@ -107,12 +108,10 @@ class SchemaOperation:
         return dbs
 
     @staticmethod
-    def show_relations(session, catalog: str, database: str) -> (List[str], List[str]):
-        """
-        note: for hive catalog, show tables also returns views
-        views = show views in catalog.database
-        tables = show tables in catalog.database - views
-        """
+    def show_relations(session, catalog: str, database: str) -> Tuple[List[str], List[str]]:
+        # note: for hive catalog, show tables also returns views
+        # views = show views in catalog.database
+        # tables = show tables in catalog.database - views
         views = SchemaOperation.show_views(session, catalog, database)
 
         if catalog is None:
@@ -136,12 +135,8 @@ class SchemaOperation:
 
     @staticmethod
     def show_views(session: SqlGatewaySession, catalog: str = None, database: str = None) -> List[str]:
-        """
-        NO such sql
-        show views in|from catalog.database
-        """
-        sql = "show views"
-        return SchemaOperation.show_xxx(session, sql)
+        # NO such sql: show views in|from catalog.database
+        return SchemaOperation.show_xxx(session, sql_show_views)
 
     @staticmethod
     def show_xxx(session: SqlGatewaySession, sql: str) -> List[str]:
