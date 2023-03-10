@@ -3,7 +3,7 @@ import os
 from os.path import expanduser
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Optional, Any, Tuple
+from typing import Optional, Any, Tuple, List
 
 import dbt.exceptions  # noqa
 import yaml
@@ -15,6 +15,7 @@ from dbt.events import AdapterLogger
 from dbt.adapters.flink.handler import FlinkHandler, FlinkCursor
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 from flink.sqlgateway.config import SqlGatewayConfig
+from flink.sqlgateway.operations_freq import FrequentSyncOperation
 from flink.sqlgateway.session import SqlGatewaySession
 
 logger = AdapterLogger("Flink")
@@ -32,6 +33,8 @@ class FlinkCredentials(Credentials):
     host: str
     port: int
     session_name: str
+    database: str
+    schema: str
     session_idle_timeout_s: int = 10 * 60
 
     _ALIASES = {"session": "session_name"}
@@ -53,7 +56,7 @@ class FlinkCredentials(Credentials):
         """
         List of keys to display in the `dbt debug` output.
         """
-        return "host", "port", "session_name"
+        return "host", "port", "session_name", "database", "schema"
 
 
 class FlinkConnectionManager(SQLConnectionManager):
@@ -167,3 +170,19 @@ class FlinkConnectionManager(SQLConnectionManager):
 
     def add_commit_query(self):
         pass
+
+    def show_catalogs(self) -> List[str]:
+        connection: Connection = self.get_thread_connection()
+        handle: FlinkHandler = connection.handle
+        return FrequentSyncOperation.show_catalogs(handle.session)
+
+    def show_databases(self, catalog: str) -> List[str]:
+        connection: Connection = self.get_thread_connection()
+        handle: FlinkHandler = connection.handle
+        return FrequentSyncOperation.show_databases(handle.session, catalog)
+
+    def show_relations(self, catalog: str, database: str) -> (List[str], List[str]):
+        connection: Connection = self.get_thread_connection()
+        handle: FlinkHandler = connection.handle
+        tables, views = FrequentSyncOperation.show_relations(handle.session, catalog, database)
+        return tables, views

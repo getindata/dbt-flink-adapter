@@ -72,10 +72,42 @@ class FlinkAdapter(BaseAdapter):
         return False  # TODO
 
     def list_relations_without_caching(self, schema_relation: BaseRelation) -> List[BaseRelation]:
-        return []  # TODO
+        catalog = schema_relation.path.database
+        if not catalog:
+            raise RuntimeError("database(flink catalog) should not be empty")
+
+        schema = schema_relation.schema
+        if not schema:
+            raise RuntimeError("schema(flink database) should not be empty")
+
+        conn: FlinkConnectionManager = self.connections
+        tables, views = conn.show_relations(catalog, schema)
+
+        relations = []
+        if schema_relation.type is None or schema_relation.type == FlinkRelation.Table:
+            for t in tables:
+                table = self.Relation.create(database=catalog, schema=schema, id=t, type=FlinkRelation.Table)
+                relations.append(table)
+        if schema_relation.type is None or schema_relation.type == FlinkRelation.View:
+            for v in views:
+                view = self.Relation.create(database=catalog, schema=schema, id=v, type=FlinkRelation.View)
+                relations.append(view)
+
+        return relations
+
+    def get_relation(self, database: str, schema: str, identifier: str) -> Optional[BaseRelation]:
+        conn: FlinkConnectionManager = self.connections
+        tables, views = conn.show_relations(database, schema)
+        if identifier in tables:
+            rel = self.Relation.create(database=database, schema=schema, id=identifier, type=FlinkRelation.Table)
+        elif identifier in views:
+            rel = self.Relation.create(database=database, schema=schema, id=identifier, type=FlinkRelation.View)
+
+        return rel
 
     def list_schemas(self, database: str) -> List[str]:
-        return []  # TODO
+        conn: FlinkConnectionManager = self.connections
+        return conn.show_catalogs()
 
     @classmethod
     def quote(cls, identifier: str) -> str:
