@@ -149,7 +149,6 @@ class FrequentSyncOperation:
     def execute_sql_and_wait_end(session: SqlGatewaySession, sql) -> (Exception, SqlGatewayOperation):
         operation = SqlGatewayOperation.execute_statement(session, sql)
         try:
-            # wait till over
             status = operation.get_status()
             while status == STATUS_RUNNING:
                 time.sleep(pull_interval_s)
