@@ -97,8 +97,10 @@ class SchemaOperation:
                 need_switch_catalog = True
 
         if need_switch_catalog:
-            if SchemaOperation.use_catalog_database(session, catalog):
-                raise RuntimeError(f"fail query database in {catalog}, please check catalog {catalog} exists")
+            try:
+                SchemaOperation.use_catalog_database(session, catalog)
+            except Exception as e:
+                raise RuntimeError(f"fail list database in {catalog}, please check {catalog} exists in this session")
         dbs = SchemaOperation.show_xxx(session, sql_show_databases)
 
         # switch back database if necessary

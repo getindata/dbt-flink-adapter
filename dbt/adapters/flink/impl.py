@@ -109,7 +109,7 @@ class FlinkAdapter(BaseAdapter):
         return rel
 
     def list_schemas(self, database: str) -> List[str]:
-        return self.connections.show_catalogs()
+        return self.connections._show_databases(database)
 
     @classmethod
     def quote(cls, identifier: str) -> str:
