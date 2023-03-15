@@ -11,6 +11,7 @@ import json
 
 class MockFlinkSqlGatewayClient(FlinkSqlGatewayClient):
     router: GwRouter
+    session: SqlGatewaySession
 
     @staticmethod
     def create_session(host: str, port: int, session_name: str) -> SqlGatewaySession:
@@ -28,7 +29,9 @@ class MockFlinkSqlGatewayClient(FlinkSqlGatewayClient):
         # create session
         r = requests.post(f"{host_port}/v1/sessions", json.dumps({"sessionName": f"{session_name}"}))
         session_handle = r.json()['sessionHandle']
-        return SqlGatewaySession(SqlGatewayConfig(host, port, session_name), session_handle)
+        session = SqlGatewaySession(SqlGatewayConfig(host, port, session_name), session_handle)
+        MockFlinkSqlGatewayClient.session = session
+        return session
 
     @staticmethod
     def execute_statement(session: SqlGatewaySession, sql: str) -> SqlGatewayOperation:
@@ -44,9 +47,13 @@ class MockFlinkSqlGatewayClient(FlinkSqlGatewayClient):
         return SqlGatewayOperation(session=session, operation_handle=operation_handle)
 
     @staticmethod
-    def clear_statements(session: SqlGatewaySession):
+    def clear_statements(session: SqlGatewaySession = None):
         return MockFlinkSqlGatewayClient.router.clear_statements()
 
     @staticmethod
-    def all_statements(session: SqlGatewaySession) -> List[str]:
+    def all_statements(session: SqlGatewaySession = None) -> List[str]:
         return MockFlinkSqlGatewayClient.router.all_statements()
+
+
+def sql_equivalent(s1: str, s2: str) -> bool:
+    return "".join(s1.strip().split()) == "".join(s2.strip().split())

@@ -8,6 +8,8 @@ from dbt.tests.util import (
     check_relations_equal,
 )
 
+from tests.sqlgateway.mock.mock_client import MockFlinkSqlGatewayClient, sql_equivalent
+
 seeds_base_csv = """
 id,name,some_date
 1,Easton,1981-05-20T06:46:51
@@ -46,6 +48,7 @@ test_failing_sql = """
 select /** fetch_timeout_ms(10000) */ /** fetch_mode('streaming') */ * from base where id = 10
 """
 
+
 class TestSeeds():
     @pytest.fixture(scope="class")
     def seeds(self):
@@ -73,6 +76,50 @@ class TestSeeds():
         # seed result length
         assert len(results) == 1
 
+        # we assert sql that received by MockSqlGateway
+        # sql will be compared ignore \n \t \s, feel free to edit
+        expect_sql_sequential = [
+            "SET 'execution.runtime-mode' = 'batch'",
+            """
+            /* {"app": "dbt", "dbt_version": "1.3.3", "profile_name": "test", "target_name": "default", "node_id": "seed.base.base"} */
+                create table if not exists base (id DECIMAL,name STRING,some_date TIMESTAMP) with (
+                   'connector' = 'kafka',
+                   'properties.bootstrap.servers' = 'kafka:29092',
+                   'topic' = 'base',
+                   'scan.startup.mode' = 'earliest-offset',
+                   'value.format' = 'json',
+                   'properties.group.id' = 'my-working-group',
+                   'value.json.encode.decimal-as-plain-number' = 'true'
+                )
+            """,
+            "SET 'execution.runtime-mode' = 'batch'",
+            """
+            insert into base (id, name, some_date) values
+            (1,'Easton',TIMESTAMP '1981-05-20 06:46:51'),
+            (2,'Lillian',TIMESTAMP '1978-09-03 18:10:33'),
+            (3,'Jeremiah',TIMESTAMP '1982-03-11 03:59:51'),
+            (4,'Nolan',TIMESTAMP '1976-05-06 20:21:35'),
+            (5,'Hannah',TIMESTAMP '1982-06-23 05:41:26'),
+            (6,'Eleanor',TIMESTAMP '1991-08-10 23:12:21'),
+            (7,'Lily',TIMESTAMP '1971-03-29 14:58:02'),
+            (8,'Jonathan',TIMESTAMP '1988-02-26 02:55:24'),
+            (9,'Adrian',TIMESTAMP '1994-02-09 13:14:23'),
+            (10,'Nora',TIMESTAMP '1976-03-01 16:51:39')
+            """
+        ]
+        stats = MockFlinkSqlGatewayClient.all_statements()
+        assert len(stats) == len(expect_sql_sequential)
+        for i in range(0, len(stats)):
+            assert sql_equivalent(stats[i], expect_sql_sequential[i])
+
+        # run a second time, need clean
+        MockFlinkSqlGatewayClient.clear_statements()
+        results = run_dbt(["seed"])
+        assert len(results) == 1
+        stats = MockFlinkSqlGatewayClient.all_statements()
+        assert len(stats) == len(expect_sql_sequential)
+        for i in range(0, len(stats)):
+            assert sql_equivalent(stats[i], expect_sql_sequential[i])
         # TODO: This does not assert anything useful. In order to assert we need to execute test but test will need to first materialize source as between `run_dbt` we have different sessions and base does not persist.
 
         # # test command
