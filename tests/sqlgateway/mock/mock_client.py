@@ -62,13 +62,3 @@ class MockFlinkSqlGatewayClient():
             session_name if session_name else os.getenv('SESSION_NAME', 'test_session'),
         )
         return client
-
-    def assert_sql_received(self, expect: List[str]):
-        actual = self.all_statements()
-        assert len(expect) == len(actual)
-        for i in range(0, len(expect)):
-            assert MockFlinkSqlGatewayClient._sql_equivalent(expect[i], actual[i])
-
-    @staticmethod
-    def _sql_equivalent(s1: str, s2: str) -> bool:
-        return "".join(s1.strip().split()) == "".join(s2.strip().split())
