@@ -20,3 +20,4 @@ twine
 wheel
 requests
 pyyaml
+httpretty
