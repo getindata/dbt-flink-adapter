@@ -58,7 +58,9 @@ class SchemaOperation:
     """
 
     @staticmethod
-    def use_catalog_database(session: SqlGatewaySession, catalog: str = None, database: str = None) -> bool:
+    def use_catalog_database(
+        session: SqlGatewaySession, catalog: str = None, database: str = None
+    ) -> bool:
         if catalog:
             if database:
                 sql = f"use {catalog}.{database}"
@@ -89,7 +91,7 @@ class SchemaOperation:
     @staticmethod
     def show_databases(session: SqlGatewaySession, catalog: str) -> List[str]:
         need_switch_catalog = False
-        current_catalog = ''
+        current_catalog = ""
 
         if catalog:
             current_catalog = SchemaOperation.show_current_catalogs(session)
@@ -100,7 +102,9 @@ class SchemaOperation:
             try:
                 SchemaOperation.use_catalog_database(session, catalog)
             except Exception as e:
-                raise RuntimeError(f"fail list database in {catalog}, please check {catalog} exists in this session")
+                raise RuntimeError(
+                    f"fail list database in {catalog}, please check {catalog} exists in this session"
+                )
         dbs = SchemaOperation.show_xxx(session, sql_show_databases)
 
         # switch back database if necessary
@@ -131,12 +135,12 @@ class SchemaOperation:
         return real_tables, views
 
     @staticmethod
-    def show_tables(session: SqlGatewaySession, catalog: str = None, database: str = None) -> List[str]:
+    def show_tables(session: SqlGatewaySession, catalog: str, database: str) -> List[str]:
         real_tables, _ = SchemaOperation.show_relations(session, catalog, database)
         return real_tables
 
     @staticmethod
-    def show_views(session: SqlGatewaySession, catalog: str = None, database: str = None) -> List[str]:
+    def show_views(session: SqlGatewaySession, catalog: str, database: str) -> List[str]:
         # NO such sql: show views in|from catalog.database
         return SchemaOperation.show_xxx(session, sql_show_views)
 
@@ -146,7 +150,9 @@ class SchemaOperation:
         return SchemaOperation.execute_sql_collect_all_result(session, sql, collector)
 
     @staticmethod
-    def execute_sql_collect_all_result(session: SqlGatewaySession, sql: str, collector: ResultCollector):
+    def execute_sql_collect_all_result(
+        session: SqlGatewaySession, sql: str, collector: ResultCollector
+    ):
         operation = SchemaOperation.execute_sql_and_wait_end(session, sql)
 
         try:

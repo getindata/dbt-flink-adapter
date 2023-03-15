@@ -76,7 +76,7 @@ class FlinkAdapter(BaseAdapter):
     def is_cancelable(cls) -> bool:
         return False  # TODO
 
-    def list_relations_without_caching(self, schema_relation: BaseRelation) -> List[FlinkRelation]:
+    def list_relations_without_caching(self, schema_relation: BaseRelation):
         database = schema_relation.path.database
         if not database:
             raise RuntimeError("database(flink catalog) should not be empty")

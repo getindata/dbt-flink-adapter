@@ -117,7 +117,7 @@ class FlinkConnectionManager(SQLConnectionManager):
                 )
 
                 if (
-                        datetime.now() - session_timestamp
+                    datetime.now() - session_timestamp
                 ).seconds > credentials.session_idle_timeout_s:
                     logger.info("Stored session has timeout.")
                     return None
