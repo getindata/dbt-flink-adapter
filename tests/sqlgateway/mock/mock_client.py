@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from flink.sqlgateway.client import FlinkSqlGatewayClient
@@ -9,12 +10,13 @@ import requests
 import json
 
 
-class MockFlinkSqlGatewayClient(FlinkSqlGatewayClient):
-    router: GwRouter
-    session: SqlGatewaySession
+class MockFlinkSqlGatewayClient():
+    def __init__(self):
+        self.router = None
+        self.session = None
+        pass
 
-    @staticmethod
-    def create_session(host: str, port: int, session_name: str) -> SqlGatewaySession:
+    def create_session(self, host: str, port: int, session_name: str) -> SqlGatewaySession:
         host_port = f"http://{host}:{port}"
         test_config = {
             "host_port": host_port,
@@ -24,36 +26,49 @@ class MockFlinkSqlGatewayClient(FlinkSqlGatewayClient):
             "current_catalog": "default_catalog",
             "current_database": "default_database",
         }
-        MockFlinkSqlGatewayClient.router = GwRouter(test_config)
-        MockFlinkSqlGatewayClient.router.start()
+        self.router = GwRouter(test_config)
+        self.router.start()
         # create session
         r = requests.post(f"{host_port}/v1/sessions", json.dumps({"sessionName": f"{session_name}"}))
         session_handle = r.json()['sessionHandle']
         session = SqlGatewaySession(SqlGatewayConfig(host, port, session_name), session_handle)
-        MockFlinkSqlGatewayClient.session = session
+        self.session = session
         return session
 
-    @staticmethod
-    def execute_statement(session: SqlGatewaySession, sql: str) -> SqlGatewayOperation:
-        if session.session_handle is None:
+    def execute_statement(self, sql: str) -> SqlGatewayOperation:
+        if self.session.session_handle is None:
             raise Exception(
-                f"Session '{session.config.session_name}' is not created. Call create() method first"
+                f"Session '{self.session.config.session_name}' is not created. Call create() method first"
             )
-        host_port = f"http://{session.config.host}:{session.config.port}"
-        session_handle = session.session_handle
+        host_port = f"http://{self.session.config.host}:{self.session.config.port}"
+        session_handle = self.session.session_handle
         data = {"statement": sql}
         r = requests.post(f"{host_port}/v1/sessions/{session_handle}/statements", json.dumps(data))
         operation_handle = r.json()['operationHandle']
-        return SqlGatewayOperation(session=session, operation_handle=operation_handle)
+        return SqlGatewayOperation(session=self.session, operation_handle=operation_handle)
+
+    def clear_statements(self):
+        return self.router.clear_statements()
+
+    def all_statements(self) -> List[str]:
+        return self.router.all_statements()
 
     @staticmethod
-    def clear_statements(session: SqlGatewaySession = None):
-        return MockFlinkSqlGatewayClient.router.clear_statements()
+    def setup(host: str = None, port: str | int = None, session_name: str = None):
+        client = MockFlinkSqlGatewayClient()
+        _ = client.create_session(
+            host if host else os.getenv('FLINK_SQL_GATEWAY_HOST', '127.0.0.1'),
+            port if port else int(os.getenv('FLINK_SQL_GATEWAY_PORT', '8083')),
+            session_name if session_name else os.getenv('SESSION_NAME', 'test_session'),
+        )
+        return client
+
+    def assert_sql_received(self, expect: List[str]):
+        actual = self.all_statements()
+        assert len(expect) == len(actual)
+        for i in range(0, len(expect)):
+            assert MockFlinkSqlGatewayClient._sql_equivalent(expect[i], actual[i])
 
     @staticmethod
-    def all_statements(session: SqlGatewaySession = None) -> List[str]:
-        return MockFlinkSqlGatewayClient.router.all_statements()
-
-
-def sql_equivalent(s1: str, s2: str) -> bool:
-    return "".join(s1.strip().split()) == "".join(s2.strip().split())
+    def _sql_equivalent(s1: str, s2: str) -> bool:
+        return "".join(s1.strip().split()) == "".join(s2.strip().split())

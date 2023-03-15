@@ -1,79 +1,65 @@
-from typing import List
-
 import json
+from typing import List
 
 
 class DummyGwHandle:
     session_prefix = "session_"
     operation_prefix = "operation_"
-    session_cnt = 1
-    operation_cnt = 1
-    session_handles = set()
-    operation_handles = {}
-    statements: List[str] = []
-
-    @staticmethod
-    def next_session_handle():
-        return f"{DummyGwHandle.session_prefix}{DummyGwHandle.session_cnt}"
-
-    @staticmethod
-    def next_operation_handle():
-        return f"{DummyGwHandle.operation_prefix}{DummyGwHandle.operation_cnt}"
 
     def __init__(self, config):
+        self.config = config
+        self.session_cnt = 1
+        self.operation_cnt = 1
+        self.session_handles = set()
+        self.operation_handles = {}
+        self.statements: List[str] = []
+
+    def next_session_handle(self):
+        return f"{DummyGwHandle.session_prefix}{self.session_cnt}"
+
+    def next_operation_handle(self):
+        return f"{DummyGwHandle.operation_prefix}{self.operation_cnt}"
+
+    def all_statements(self) -> List[str]:
+        return self.statements
+
+    def clear_statements(self):
+        self.statements = []
+
+    def start(self):
         pass
 
-    @staticmethod
-    def all_statements() -> List[str]:
-        return DummyGwHandle.statements
-
-    @staticmethod
-    def clear_statements():
-        DummyGwHandle.statements = []
-
-    @staticmethod
-    def start():
+    def stop(self):
         pass
 
-    @staticmethod
-    def stop():
-        pass
-
-    @staticmethod
-    def session_create(request, uri, response_headers):
-        session_handle = DummyGwHandle.next_session_handle()
-        DummyGwHandle.session_handles.add(session_handle)
+    def session_create(self, request, uri, response_headers):
+        session_handle = self.next_session_handle()
+        self.session_handles.add(session_handle)
         body = {"sessionHandle": session_handle}
         return [200, response_headers, json.dumps(body)]
 
-    @staticmethod
-    def session_delete(request, uri, response_headers):
+    def session_delete(self, request, uri, response_headers):
         raise RuntimeError("not_support")
 
-    @staticmethod
-    def statement_create(request, uri, response_headers):
+    def statement_create(self, request, uri, response_headers):
         request_body = json.loads(request.body)
         statement = request_body["statement"].strip()
-        operation_handle = DummyGwHandle.next_operation_handle()
-        DummyGwHandle.statements.append(statement)
+        operation_handle = self.next_operation_handle()
+        self.statements.append(statement)
         body = {"operationHandle": operation_handle}
         return [200, response_headers, json.dumps(body)]
 
-    @staticmethod
-    def operation_status(request, uri, response_headers):
+    def operation_status(self, request, uri, response_headers):
         """always return FINISHED"""
         # raise RuntimeError("not_support")
         body = {"status": "FINISHED"}
         return [200, response_headers, json.dumps(body)]
 
-    @staticmethod
-    def operation_cancel(request, uri, response_headers):
+    def operation_cancel(self, request, uri, response_headers):
         raise RuntimeError("not_support")
 
-    @staticmethod
-    def operation_close(request, uri, response_headers):
+    def operation_close(self, request, uri, response_headers):
         raise RuntimeError("not_support")
 
-    @staticmethod
-    def operation_result(request, uri, response_headers):
+    def operation_result(self, request, uri, response_headers):
         raise RuntimeError("not_support")

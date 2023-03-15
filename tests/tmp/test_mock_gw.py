@@ -22,32 +22,29 @@ test_config = {
 class TestTmp(unittest.TestCase):
     def test1(self):
         router = GwRouter(test_config)
-        v1_ep = f"{test_config.get('host_port')}/v1"
         router.start()
 
-        print(f"======= get {v1_ep}/api_version")
-        r = requests.get(f"{v1_ep}/api_version")
-        # print(r.status_code)
-        self.assertEqual(200, r.status_code)
-        print(r.text)
+        # ========= test basic api =========
+        v1_ep = f"{test_config.get('host_port')}/v1"
 
-        # session 测试 =========
-        # session 测试 =========
-        # session 测试 =========
-        print(f"======= post {v1_ep}/sessions")
+        # print(f"======= get {v1_ep}/api_version")
+        r = requests.get(f"{v1_ep}/api_version")
+        self.assertEqual(200, r.status_code)
+        # print(r.text)
+
+        # ========= test session api =========
+        # print(f"======= post {v1_ep}/sessions")
         r = requests.post(f"{v1_ep}/sessions", '{"sessionName" : "hehe"}')
-        # print(r.status_code)
-        print(r.text)
+        # print(r.text)
         self.assertEqual(200, r.status_code)
         session_handle = r.json()['sessionHandle']
 
-        print(f"======= get {v1_ep}/sessions/{session_handle}")
+        # print(f"======= get {v1_ep}/sessions/{session_handle}")
         r = requests.get(f"{v1_ep}/sessions/{session_handle}")
-        # print(r.status_code)
         self.assertEqual(200, r.status_code)
-        print(r.text)
+        # print(r.text)
 
-        print(f"======= post {v1_ep}/sessions/{session_handle}/statements")
+        # print(f"======= post {v1_ep}/sessions/{session_handle}/statements")
         data = {"statement": "select 1 as id", "executionTimeout": 100}
         # r = requests.post(url=f"{v1_ep}/sessions/{session_handle}/statements", data=json.dumps(data))
         r = requests.post(
@@ -57,9 +54,9 @@ class TestTmp(unittest.TestCase):
                 "Content-Type": "application/json",
             },
         )
-        # print(r.status_code)
-        print(r.text)
-        operation_handle = r.json()['operationHandle']
-        print(router.all_statements())
+        # print(r.text)
+        # operation_handle = r.json()['operationHandle']
+        # print(router.all_statements())
+        self.assertEqual(200, r.status_code)
 
         router.stop()

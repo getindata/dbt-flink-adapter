@@ -15,7 +15,7 @@ pytest_plugins = ["dbt.tests.fixtures.project"]
 # The profile dictionary, used to write out profiles.yml
 @pytest.fixture(scope="class")
 def dbt_profile_target():
-    profile = {
+    return {
         'type': 'flink',
         'threads': 1,
         'host': os.getenv('FLINK_SQL_GATEWAY_HOST', '127.0.0.1'),
@@ -24,12 +24,3 @@ def dbt_profile_target():
         'database': os.getenv('DATABASE_NAME', 'default_catalog'),
         'schema': os.getenv('DATABASE_NAME', 'default_database'),
     }
-
-    # we need setup MockFlinkSqlGatewayClient
-    MockFlinkSqlGatewayClient.create_session(
-        host=profile.get("host"),
-        port=profile.get("port"),
-        session_name=profile.get("session_name"),
-    )
-
-    return profile
