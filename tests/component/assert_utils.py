@@ -1,93 +1,50 @@
 from typing import List
 
-
-def assert_sql_equals(expect: List[str], actual: List[str]):
-    len_expect = len(expect)
-    len_actual = len(actual)
-    len_equal = len_expect == len_actual
-    err_msg = "" if len_equal else f"len(expect)={len(expect)}, len(actual)={len(actual)}\n"
-
-    min_len = min(len_expect, len_actual)
-    first_non_equal = False
-    for i in range(0, min_len):
-        sql_expect = expect[i]
-        sql_actual = actual[i]
-        if not _sql_equivalent(sql_expect, sql_actual):
-            first_non_equal = True
-            err_msg = f"""
-{err_msg}
-first {i} same sql, and first not equal sql index={i + 1} is
+pattern_err_msg = """
+len(expect)={}, len(actual)={}
+first {} sql equal, first unequal sql is
 ==============================
-{expect[i]}
+{}
 ==============================
-{actual[i]}
-==============================\n"""
-
-    if (not len_equal) and (not first_non_equal):
-        next_expect = ""
-        if len_expect > min_len:
-            next_expect = expect[min_len]
-        next_actual = ""
-        if len_actual > min_len:
-            next_actual = actual[min_len]
-
-        err_msg = f"""
-{err_msg}
-first {min_len} same sql, and first not equal sql index={min_len + 1} is
+{}
 ==============================
-{next_expect}
-==============================
-{next_actual}
-==============================\n"""
-
-    assert (not err_msg), err_msg
+"""
 
 
-def assert_sql_equals_basic(expect: List[str], actual: List[str]):
-    assert len(expect) == len(actual), f"len(expect)={len(expect)}, len(actual)={len(actual)}"
-    for i in range(0, len(expect)):
-        assert _sql_equivalent(expect[i], actual[i])
+class AssertUtils:
 
+    @staticmethod
+    def assert_sql_equals(expect: List[str], actual: List[str], err_msg: str = None):
+        equal, msg = AssertUtils._check_sql_equal_with_detail_msg(expect, actual)
+        assert equal, err_msg if err_msg else msg
 
-def _sql_equivalent(s1: str, s2: str) -> bool:
-    return "".join(s1.strip().split()) == "".join(s2.strip().split())
+    @staticmethod
+    def assert_sql_not_equals(expect: List[str], actual: List[str], err_msg: str = None):
+        equal, msg = AssertUtils._check_sql_equal_with_detail_msg(expect, actual)
+        assert (not equal), err_msg if err_msg else msg
 
+    @staticmethod
+    def _str_equal_ignore_space_tab_cr(s1: str, s2: str) -> bool:
+        return "".join(s1.strip().split()) == "".join(s2.strip().split())
 
-# sql1 = ["""
-#
-#  a b c d
-# e
-# f
-# select gg from hh
-# g
-#
-# """]
-# sql2 = ["""
-#  a b c d e f select gg from hh g
-# """]
-# assert_sql_equals(sql1, sql2)
-#
-#
-# sql1 = ["a", "b", "c"]
-# sql2 = ["a", "b", "d"]
-# assert_sql_equals(sql1, sql2)
+    @staticmethod
+    def _check_sql_equal_with_detail_msg(expect: List[str], actual: List[str]):
+        len_expect = len(expect)
+        len_actual = len(actual)
+        min_len = min(len_expect, len_actual)
+        max_len = max(len_expect, len_actual)
 
-# sql1 = ["a", "b", "c", "d"]
-# sql2 = ["a", "b", "c"]
-# assert_sql_equals(sql1, sql2)
+        last_equal_index = -1
+        for i in range(0, min_len):
+            last_equal_index = i
+            if not AssertUtils._str_equal_ignore_space_tab_cr(expect[i], actual[i]):
+                last_equal_index = i - 1
+                break
 
-# sql1 = ["a", "b", "c", ]
-# sql2 = ["a", "b", "c", "d"]
-# assert_sql_equals(sql1, sql2)
+        if last_equal_index + 1 == max_len:
+            return True, None
 
-# sql1 = []
-# sql2 = ["a", "b", "c", "d"]
-# assert_sql_equals(sql1, sql2)
-
-# sql1 = ["a", "b", "c", "d"]
-# sql2 = []
-# assert_sql_equals(sql1, sql2)
-
-# sql1 = []
-# sql2 = []
-# assert_sql_equals(sql1, sql2)
+        next_expect = expect[last_equal_index + 1] if last_equal_index + 1 < len_expect else ""
+        next_actual = actual[last_equal_index + 1] if last_equal_index + 1 < len_actual else ""
+        err_msg = pattern_err_msg.format(len_expect, len_actual, last_equal_index + 1, next_expect, next_actual)
+        return False, err_msg
