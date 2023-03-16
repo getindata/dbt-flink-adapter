@@ -8,16 +8,18 @@ class DummyGwHandle:
 
     def __init__(self, config):
         self.config = config
-        self.session_cnt = 1
-        self.operation_cnt = 1
+        self.session_cnt = 0
+        self.operation_cnt = 0
         self.session_handles = set()
         self.operation_handles = {}
         self.statements: List[str] = []
 
     def next_session_handle(self):
+        self.session_cnt += 1
         return f"{DummyGwHandle.session_prefix}{self.session_cnt}"
 
     def next_operation_handle(self):
+        self.operation_cnt += 1
         return f"{DummyGwHandle.operation_prefix}{self.operation_cnt}"
 
     def all_statements(self) -> List[str]:
@@ -45,6 +47,7 @@ class DummyGwHandle:
         request_body = json.loads(request.body)
         statement = request_body["statement"].strip()
         operation_handle = self.next_operation_handle()
+        self.operation_handles[operation_handle] = "TODO: an object to keep context info"
         self.statements.append(statement)
         body = {"operationHandle": operation_handle}
         return [200, response_headers, json.dumps(body)]

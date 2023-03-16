@@ -1,7 +1,6 @@
 import os
 from typing import List
 
-from flink.sqlgateway.client import FlinkSqlGatewayClient
 from flink.sqlgateway.operation import SqlGatewayOperation
 from flink.sqlgateway.session import SqlGatewaySession
 from flink.sqlgateway.config import SqlGatewayConfig
@@ -10,11 +9,10 @@ import requests
 import json
 
 
-class MockFlinkSqlGatewayClient():
+class MockFlinkSqlGatewayClient:
     def __init__(self):
         self.router = None
         self.session = None
-        pass
 
     def create_session(self, host: str, port: int, session_name: str) -> SqlGatewaySession:
         host_port = f"http://{host}:{port}"
