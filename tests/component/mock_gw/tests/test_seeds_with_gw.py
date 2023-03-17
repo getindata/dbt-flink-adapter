@@ -11,8 +11,8 @@ from dbt.tests.util import (
     check_relations_equal,
 )
 
-from tests.component.assert_utils import AssertUtils
-from tests.sqlgateway.mock.mock_client import MockFlinkSqlGatewayClient
+from tests.component.mock_gw.assert_utils import AssertUtils
+from tests.component.mock_gw.mock_gw import MockSqlGateway
 
 seeds_base_csv = """
 id,name,some_date
@@ -34,14 +34,6 @@ seeds:
         'value.format': 'json'
         'properties.group.id': 'my-working-group'
         'value.json.encode.decimal-as-plain-number': 'true'
-"""
-
-test_passing_sql = """
-select /** fetch_timeout_ms(10000) */ /** fetch_mode('streaming') */ * from base where id = 11
-"""
-
-test_failing_sql = """
-select /** fetch_timeout_ms(10000) */ /** fetch_mode('streaming') */ * from base where id = 10
 """
 
 seed_expect_statements = [
@@ -67,19 +59,12 @@ seed_expect_statements = [
 ]
 
 
-class TestSeeds():
+class TestSeeds:
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
             "base.csv": seeds_base_csv,
             "base.yml": seeds_base_yml,
-        }
-
-    @pytest.fixture(scope="class")
-    def tests(self):
-        return {
-            "passing.sql": test_passing_sql,
-            "failing.sql": test_failing_sql,
         }
 
     @pytest.fixture(scope="class")
@@ -89,8 +74,8 @@ class TestSeeds():
         }
 
     def test_seed(self, project):
-        # MUST set up client before run any dbt command
-        client = MockFlinkSqlGatewayClient.setup()
+        # MUST set up gateway before run any dbt command
+        gw = MockSqlGateway.use_default_config()  # all http request to {host_port} will cast to MockSqlGateway
 
         # seed command
         results = run_dbt(["seed"])
@@ -98,9 +83,9 @@ class TestSeeds():
         assert len(results) == 1
 
         # assert sql received by MockSqlGateway, sql will be compared ignore \n \t \s, feel free to edit
-        AssertUtils.assert_sql_equals(seed_expect_statements, client.all_statements())
+        AssertUtils.assert_sql_equals(seed_expect_statements, gw.all_statements())
 
         # in case run dbt cmd a second time, MUST clean
-        client.clear_statements()
+        gw.clear_statements()
         _ = run_dbt(["seed"])
-        AssertUtils.assert_sql_equals(seed_expect_statements, client.all_statements())
+        AssertUtils.assert_sql_equals(seed_expect_statements, gw.all_statements())

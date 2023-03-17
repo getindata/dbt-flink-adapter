@@ -2,8 +2,6 @@ import os
 
 import pytest
 
-from tests.sqlgateway.mock.mock_client import MockFlinkSqlGatewayClient
-
 # import json
 
 # Import the fuctional fixtures as a plugin

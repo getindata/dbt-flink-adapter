@@ -3,29 +3,15 @@ import unittest
 
 import requests
 
-from tests.sqlgateway.mock.gw_router import GwRouter
-
-test_config = {
-    "host_port": "http://127.0.0.1:8083",
-    "schemas": [
-        {"catalog": "default_catalog", "database": "default_database", "tables": ["a"], "views": []},
-        {"catalog": "default_catalog", "database": "default_database", "tables": [], "views": ["b"]},
-        {"catalog": "my_hive", "database": "flink01", "tables": ["t01", "t02", "v01", "v02"], "views": ["v01", "v02"]},
-        {"catalog": "hive_catalog", "database": "flink04", "tables": ["t11", "t12", ], "views": []},
-        # {"catalog": "", "database": "", "tables": [], "views": []},
-    ],
-    "current_catalog": "my_hive",
-    "current_database": "flink01",
-}
+from tests.component.mock_gw.mock_gw import MockSqlGateway
 
 
 class TestTmp(unittest.TestCase):
     def test1(self):
-        router = GwRouter(test_config)
-        router.start()
+        gw = MockSqlGateway.use_default_config()
+        v1_ep = gw.get_v1_endpoint()
 
         # ========= test basic api =========
-        v1_ep = f"{test_config.get('host_port')}/v1"
 
         # print(f"======= get {v1_ep}/api_version")
         r = requests.get(f"{v1_ep}/api_version")
@@ -56,7 +42,7 @@ class TestTmp(unittest.TestCase):
         )
         # print(r.text)
         # operation_handle = r.json()['operationHandle']
-        # print(router.all_statements())
+        # print(gw.all_statements())
         self.assertEqual(200, r.status_code)
 
-        router.stop()
+        gw.stop()

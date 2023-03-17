@@ -1,6 +1,6 @@
 import unittest
 
-from tests.component.assert_utils import AssertUtils
+from tests.component.mock_gw.assert_utils import AssertUtils
 
 
 class TestTmp(unittest.TestCase):

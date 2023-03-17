@@ -21,3 +21,5 @@ wheel
 requests
 pyyaml
 httpretty
+sqlglot
+

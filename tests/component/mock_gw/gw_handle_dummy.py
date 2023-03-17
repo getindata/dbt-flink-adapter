@@ -1,8 +1,10 @@
-import json
 from typing import List
 
 
 class DummyGwHandle:
+    """
+    simply record all received sql, do nothing
+    """
     session_prefix = "session_"
     operation_prefix = "operation_"
 
@@ -13,6 +15,9 @@ class DummyGwHandle:
         self.session_handles = set()
         self.operation_handles = {}
         self.statements: List[str] = []
+
+    def get_backend(self):
+        return None
 
     def next_session_handle(self):
         self.session_cnt += 1
@@ -34,35 +39,30 @@ class DummyGwHandle:
     def stop(self):
         pass
 
-    def session_create(self, request, uri, response_headers):
+    def session_create(self):
         session_handle = self.next_session_handle()
         self.session_handles.add(session_handle)
-        body = {"sessionHandle": session_handle}
-        return [200, response_headers, json.dumps(body)]
+        return {"sessionHandle": session_handle}
 
-    def session_delete(self, request, uri, response_headers):
+    def session_delete(self, session_handle):
         raise RuntimeError("not_support")
 
-    def statement_create(self, request, uri, response_headers):
-        request_body = json.loads(request.body)
+    def statement_create(self, session_handle, request_body):
         statement = request_body["statement"].strip()
         operation_handle = self.next_operation_handle()
         self.operation_handles[operation_handle] = "TODO: an object to keep context info"
         self.statements.append(statement)
-        body = {"operationHandle": operation_handle}
-        return [200, response_headers, json.dumps(body)]
+        return {"operationHandle": operation_handle}
 
-    def operation_status(self, request, uri, response_headers):
+    def operation_status(self, session_handle, operation_handle):
         """always return FINISHED"""
-        # raise RuntimeError("not_support")
-        body = {"status": "FINISHED"}
-        return [200, response_headers, json.dumps(body)]
+        return {"status": "FINISHED"}
 
-    def operation_cancel(self, request, uri, response_headers):
+    def operation_cancel(self, session_handle, operation_handle):
         raise RuntimeError("not_support")
 
-    def operation_close(self, request, uri, response_headers):
+    def operation_close(self, session_handle, operation_handle):
         raise RuntimeError("not_support")
 
-    def operation_result(self, request, uri, response_headers):
+    def operation_result(self, session_handle, operation_handle, token):
         raise RuntimeError("not_support")
