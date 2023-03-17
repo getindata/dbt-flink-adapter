@@ -3,14 +3,14 @@ import unittest
 from dbt.adapters.flink.handler import FlinkCursor
 from flink.sqlgateway.client import FlinkSqlGatewayClient
 from tests.component.mock_gw.assert_utils import AssertUtils
-from tests.component.mock_gw.mock_gw import MockSqlGateway, config_empty_session
+from tests.component.mock_gw.mock_gw import MockSqlGateway, default_config
 
 
 class TestTmp(unittest.TestCase):
 
     def test_cursor_against_gw(self):
         # MUST set up gateway before run any dbt command
-        gw = MockSqlGateway(config_empty_session)
+        gw = MockSqlGateway(default_config)
 
         session = FlinkSqlGatewayClient.create_session(
             host="127.0.0.1",

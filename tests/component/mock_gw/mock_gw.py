@@ -15,7 +15,7 @@ mock_session_info = {
     }
 }
 
-default_config_sample = {
+many_catalog_config = {
     "host": "127.0.0.1",
     "port": "8083",
     "schemas": [
@@ -35,7 +35,7 @@ default_config_sample = {
     "current_database": "default_database",
 }
 
-config_empty_session = {
+default_config = {
     "host": "127.0.0.1",
     "port": "8083",
     "schemas": [
@@ -51,7 +51,11 @@ class MockSqlGateway:
 
     @staticmethod
     def use_default_config():
-        return MockSqlGateway(default_config_sample)
+        return MockSqlGateway(default_config)
+
+    @staticmethod
+    def use_many_catalog_config():
+        return MockSqlGateway(many_catalog_config)
 
     def __init__(self, config):
         print("============ gateway config ==========")

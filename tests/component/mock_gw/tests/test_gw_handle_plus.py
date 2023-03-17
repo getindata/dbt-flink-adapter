@@ -2,7 +2,7 @@ import unittest
 from typing import List
 
 from tests.component.mock_gw.gw_handle_plus import GwHandlePlus
-from tests.component.mock_gw.mock_gw import default_config_sample
+from tests.component.mock_gw.mock_gw import many_catalog_config
 
 sql_create_table_t99 = """
 create table t99(id int, name varchar(20), ts timestamp)
@@ -44,7 +44,7 @@ def _execute_sql_check_result_twice(sql_s: List[str]):
     execute some sql, and return result of last sql
     typically we mock results = some-payload, EOS
     """
-    gw_handle = GwHandlePlus(default_config_sample)
+    gw_handle = GwHandlePlus(many_catalog_config)
     session_handle = gw_handle.session_create()["sessionHandle"]
     # first
     sql = sql_s[0]
@@ -68,7 +68,7 @@ def _execute_sql_check_result_twice(sql_s: List[str]):
     return r0
 
 
-class TestGwHandleV1(unittest.TestCase):
+class TestGwHandlePlus(unittest.TestCase):
     def test_show_tables(self):
         payload = _execute_sql_check_result_twice([sql_show_tables])
         self.assertEqual(sorted(["default_table"]), _extract_all_data_sorted(payload))
