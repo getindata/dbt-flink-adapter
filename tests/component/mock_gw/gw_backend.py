@@ -71,6 +71,8 @@ and _db_name='{}'
 and _is_table=0
 """.strip()
 
+re_remove_comment = re.compile(r"^(.*?)(/\*.*?\*/)(.*)")
+
 re_show_dbs = re.compile(r"^show\s+databases$")
 re_show_cats = re.compile(r"^show\s+catalogs$")
 
@@ -148,20 +150,15 @@ class GwBackend:
     def sql_pre_process(sql_raw):
         # remove /* xxx */ part
         sql = sql_raw.replace("\n", " ").strip().lower()
-        re_1 = re.compile(r"^(.*?)(/\*.*?\*/)(.*)")
-        match = re.search(re_1, sql)
+        match = re.search(re_remove_comment, sql)
         while match:
-            # print("round ==============")
-            # print(f"match[1]={match[1]}")
-            # print(f"match[2]={match[2]}")
-            # print(f"match[3]={match[3]}")
             if match[2]:
                 sql = f"{match[1]}{match[3]}"
                 print(f"sql={sql}")
-                match = re.search(re_1, sql)
+                match = re.search(re_remove_comment, sql)
             else:
                 break
-        return sql.strip()
+        return sql
 
     def execute_statement(self, sql_raw: str):
         sql = self.sql_pre_process(sql_raw)

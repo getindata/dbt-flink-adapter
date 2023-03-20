@@ -18,6 +18,10 @@ class TestGwBackend(unittest.TestCase):
         """
         sql_out = GwBackend.sql_pre_process(sql)
         AssertUtils.assert_sql_equals(["select * from aa"], [sql_out])
+        # no comment should also ok
+        sql = "select * from aa"
+        sql_out = GwBackend.sql_pre_process(sql)
+        AssertUtils.assert_sql_equals(["select * from aa"], [sql_out])
 
     def test_set_kv(self):
         backend = GwBackend(many_catalog_config)
