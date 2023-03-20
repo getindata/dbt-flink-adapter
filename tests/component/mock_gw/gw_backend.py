@@ -61,6 +61,7 @@ select _tbl_name
 from tbl 
 where _cat_name = '{}' 
 and _db_name='{}'
+and _tbl_name like '{}'
 """.strip()
 
 SQL_SHOW_VIEW = """
@@ -73,8 +74,8 @@ and _is_table=0
 re_show_dbs = re.compile(r"^show\s+databases$")
 re_show_cats = re.compile(r"^show\s+catalogs$")
 
-# show tables [from|in [catalog.]database]
-re_show_tbls = re.compile(r"^show\s+tables(\s+(from|in)\s+((\w)+\.)?(\w+))?$")
+# show tables [from|in [catalog.]database] like 'xxx'
+re_show_tbls = re.compile(r"^show\s+tables(\s+(from|in)\s+((\w)+\.)?(\w+))?(\s+like\s+'(\w+)')?$")
 re_show_views = re.compile(r"^show\s+views(\s+(from|in)\s+((\w)+\.)?(\w+))?$")
 
 re_show_curr_db = re.compile(r"^show\s+current\s+database$")
@@ -144,7 +145,6 @@ class GwBackend:
         print("============ init check ==========")
 
     def execute_statement(self, sql: str):
-
         sql = sql.strip().lower()
 
         # case set k=v, simple ignore
@@ -182,7 +182,8 @@ class GwBackend:
             elif match := re.search(re_show_tbls, sql):
                 catalog = match[3][:-1] if match[3] else None
                 database = match[5] if match[5] else None
-                return self._show_tables(catalog, database), "show_tables"
+                like = match[7] if match[7] else None
+                return self._show_tables(catalog, database, like), "show_tables"
             elif match := re.search(re_show_views, sql):
                 catalog = match[3][:-1] if match[3] else None
                 database = match[5] if match[5] else None
@@ -245,10 +246,11 @@ class GwBackend:
     def _show_current_database(self):
         return self.curr_db
 
-    def _show_tables(self, catalog, database):
+    def _show_tables(self, catalog, database, like):
         cat = catalog if catalog else self.curr_cat
         db = database if database else self.curr_db
-        sql = SQL_SHOW_TBL.format(cat, db)
+        like = like if like else '%'
+        sql = SQL_SHOW_TBL.format(cat, db, like)
         result = self._execute_by_sqlite(sql)
         dbs = [x[0] for x in result]
         return dbs
