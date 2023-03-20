@@ -144,10 +144,9 @@ class GwBackend:
         print("============ init check ==========")
 
     def execute_statement(self, sql: str):
-        """
-        return err, result
-        sqlglot may be useful
-        """
+
+        sql = sql.strip().lower()
+
         # case set k=v, simple ignore
         if sql.startswith("set"):
             return "OK", "set"
