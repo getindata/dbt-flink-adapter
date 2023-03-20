@@ -67,7 +67,8 @@ class MockDataProvider:
         return [x.replace(pattern, chars) for x in r] if pattern else r
 
     @staticmethod
-    def _add_data_node(res_list, kind, fields: str | List[Any]):
+    def _add_data_node(res_list, kind, fields):
+        # fields: str | List[Any]
         r = []
         _data = []
         if isinstance(fields, str):

@@ -1,6 +1,6 @@
 import sqlite3
 import re
-from typing import Any
+from typing import Any, List
 
 import sqlglot
 from sqlglot import exp
@@ -210,7 +210,7 @@ class GwBackend:
         else:
             raise "NOT support"
 
-    def _execute_by_sqlite(self, sql) -> list[Any]:
+    def _execute_by_sqlite(self, sql) -> List[Any]:
         print(f"""
 ===================sqlite execute==================
 {sql}
