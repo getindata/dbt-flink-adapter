@@ -92,9 +92,7 @@ write_dialect = "sqlite3"
 
 class GwBackend:
     """
-    backend mock_gw a sql-based engine
-    want to build it to mock_gw a catalog(like hms) + flink
-    receive statement and process, return result
+    this backend mocks a hive catalog + flink
     """
 
     # config: dict
@@ -150,8 +148,6 @@ class GwBackend:
         return err, result
         sqlglot may be useful
         """
-        sql = sql.strip().lower()
-
         # case set k=v, simple ignore
         if sql.startswith("set"):
             return "OK", "set"
@@ -167,11 +163,15 @@ class GwBackend:
                 return self._use_cat_db(None, group[1]), "use_database"
             raise RuntimeError(f"unsupported sql {sql}")
 
+        # for some sql contains /* xxx */ we will simply ignore this
+        sql = str(sqlglot.parse_one(sql))
+        sql = sql.strip().lower()
+
         # case: show catalogs
         # case: show databases
         # case: show current catalog
         # case: show current database
-        elif sql.startswith("show"):
+        if sql.startswith("show"):
             if re.search(re_show_cats, sql):
                 return self._show_catalogs(), "show_catalogs"
             elif re.search(re_show_dbs, sql):
@@ -192,7 +192,7 @@ class GwBackend:
                 raise RuntimeError(f"unsupported sql {sql}")
 
         # create database xx_db
-        elif match := re.search(re_create_db, sql):
+        if match := re.search(re_create_db, sql):
             db_name = match.group(1)
             return self._db_create(db_name), "create_database"
 
