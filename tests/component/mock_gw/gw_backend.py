@@ -144,8 +144,27 @@ class GwBackend:
         print(res.fetchall())
         print("============ init check ==========")
 
-    def execute_statement(self, sql: str):
-        sql = sql.strip().lower()
+    @staticmethod
+    def sql_pre_process(sql_raw):
+        # remove /* xxx */ part
+        sql = sql_raw.replace("\n", " ").strip().lower()
+        re_1 = re.compile(r"^(.*?)(/\*.*?\*/)(.*)")
+        match = re.search(re_1, sql)
+        while match:
+            # print("round ==============")
+            # print(f"match[1]={match[1]}")
+            # print(f"match[2]={match[2]}")
+            # print(f"match[3]={match[3]}")
+            if match[2]:
+                sql = f"{match[1]}{match[3]}"
+                print(f"sql={sql}")
+                match = re.search(re_1, sql)
+            else:
+                break
+        return sql.strip()
+
+    def execute_statement(self, sql_raw: str):
+        sql = self.sql_pre_process(sql_raw)
 
         # case set k=v, simple ignore
         if sql.startswith("set"):
@@ -161,10 +180,6 @@ class GwBackend:
             if group := re.search(re_use_db, sql):
                 return self._use_cat_db(None, group[1]), "use_database"
             raise RuntimeError(f"unsupported sql {sql}")
-
-        # for some sql contains /* xxx */ we will simply ignore this
-        sql = str(sqlglot.parse_one(sql))
-        sql = sql.strip().lower()
 
         # case: show catalogs
         # case: show databases
@@ -209,7 +224,7 @@ class GwBackend:
             is_table = GwBackend._is_table_not_view_when_create_or_drop(sql)
             return self._table_drop(sql, is_table), "_type"
         else:
-            raise "NOT support"
+            raise RuntimeError(f"unsupported sql {sql}")
 
     def _execute_by_sqlite(self, sql) -> List[Any]:
         print(f"""

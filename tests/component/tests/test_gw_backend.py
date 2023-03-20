@@ -1,5 +1,6 @@
 import unittest
 
+from tests.component.mock_gw.assert_utils import AssertUtils
 from tests.component.mock_gw.gw_backend import GwBackend
 from tests.component.mock_gw.mock_gw import many_catalog_config
 
@@ -9,6 +10,14 @@ NAME_TABLE = "tbl"
 
 
 class TestGwBackend(unittest.TestCase):
+
+    def test_sql_pre_process(self):
+        sql = """
+        /* comment1 */ select /** comment2 
+        */ * from aa /* comment 3*/
+        """
+        sql_out = GwBackend.sql_pre_process(sql)
+        AssertUtils.assert_sql_equals(["select * from aa"], [sql_out])
 
     def test_set_kv(self):
         backend = GwBackend(many_catalog_config)
