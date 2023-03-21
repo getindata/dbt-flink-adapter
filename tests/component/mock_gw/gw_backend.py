@@ -150,15 +150,14 @@ class GwBackend:
     def sql_pre_process(sql_raw):
         # remove /* xxx */ part
         sql = sql_raw.replace("\n", " ").strip().lower()
-        match = re.search(re_remove_comment, sql)
-        while match:
+        while match := re.search(re_remove_comment, sql):
             if match[2]:
                 sql = f"{match[1]}{match[3]}"
                 print(f"sql={sql}")
                 match = re.search(re_remove_comment, sql)
             else:
                 break
-        return sql
+        return sql.strip()
 
     def execute_statement(self, sql_raw: str):
         sql = self.sql_pre_process(sql_raw)
@@ -214,12 +213,12 @@ class GwBackend:
             is_table = GwBackend._is_table_not_view_when_create_or_drop(sql)
             return self._table_create(sql, is_table), "create_table" if is_table else "create_view"
         elif parsed_sql.key == "select":
-            return self._table_select(sql), "_type"
+            return self._table_select(sql), "select"
         elif parsed_sql.key == "insert":
-            return self._table_insert(sql), "_type"
+            return self._table_insert(sql), "insert"
         elif parsed_sql.key == "drop":
             is_table = GwBackend._is_table_not_view_when_create_or_drop(sql)
-            return self._table_drop(sql, is_table), "_type"
+            return self._table_drop(sql, is_table), "drop_table" if is_table else "drop_view"
         else:
             raise RuntimeError(f"unsupported sql {sql}")
 
@@ -312,6 +311,8 @@ class GwBackend:
 
     def _table_insert(self, sql):
         rewrite_sql, _ = GwBackend._sql_rewrite_remove_catalog_and_schema(sql)
+        # rewrite_sql = sqlglot.transpile(rewrite_sql, read="", write="sqlite")[0]
+        rewrite_sql = GwBackend.sql_rewrite_timestamp(rewrite_sql)
         result = self._execute_by_sqlite(rewrite_sql)
         return "OK"
 
@@ -368,3 +369,14 @@ class GwBackend:
             return False
         else:
             raise f"known create|drop statement:{sql}"
+
+    @staticmethod
+    def sql_rewrite_timestamp(sql: str):
+        # only used in insert
+        # timestamp 'xxx' => 'xxx'
+        re_remove_timestamp = re.compile(r"(.*)?timestamp\s+(\'[\d\-\:\s]+?\')(.*)")
+        rewrite_sql = sql
+        while match := re.search(re_remove_timestamp, rewrite_sql):
+            if match[2]:
+                rewrite_sql = f"{match[1]} {match[2]} {match[3]}"
+        return rewrite_sql

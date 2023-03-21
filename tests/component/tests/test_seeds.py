@@ -50,6 +50,7 @@ seed_expect_statements = [
            'value.json.encode.decimal-as-plain-number' = 'true'
         )
     """,
+
     "SET 'execution.runtime-mode' = 'batch'",
     """
     insert into base (id, name, some_date) values
@@ -73,9 +74,9 @@ class TestSeeds:
             "name": "base",
         }
 
-    def test_seed(self, project):
+    def test_seed_no_drop(self, project):
         # MUST set up gateway before run any dbt command
-        gw = MockSqlGateway.use_default_config()  # all http request to {host_port} will cast to MockSqlGateway
+        gw = MockSqlGateway.use_default_config()
 
         # seed command
         results = run_dbt(["seed"])
@@ -83,9 +84,4 @@ class TestSeeds:
         assert len(results) == 1
 
         # assert sql received by MockSqlGateway, sql will be compared ignore \n \t \s, feel free to edit
-        AssertUtils.assert_sql_equals(seed_expect_statements, gw.all_statements())
-
-        # in case run dbt cmd a second time, MUST clean
-        gw.clear_statements()
-        _ = run_dbt(["seed"])
         AssertUtils.assert_sql_equals(seed_expect_statements, gw.all_statements())

@@ -68,6 +68,7 @@ class GwHandlePlus(DummyGwHandle):
             res, _type = self.backend.execute_statement(statement)
             GwHandlePlus.fill_mock_result(op_info, res, _type)
         except Exception as e:
+            print(e)
             op_info.error = e
         #
         return {"operationHandle": operation_handle}

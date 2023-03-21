@@ -23,6 +23,22 @@ class TestGwBackend(unittest.TestCase):
         sql_out = GwBackend.sql_pre_process(sql)
         AssertUtils.assert_sql_equals(["select * from aa"], [sql_out])
 
+    def test_sql_rewrite_timestamp(self):
+        sql = """
+            insert into base (id, name, some_date) values
+            (1,'Easton',TIMESTAMP '1981-05-20 06:46:51'),
+            (2,'Lillian',TIMESTAMP '1978-09-03 18:10:33')
+        """.replace("\n", " ").strip().lower()
+
+        sql_expect = """
+            insert into base (id, name, some_date) values
+            (1,'Easton', '1981-05-20 06:46:51'),
+            (2,'Lillian', '1978-09-03 18:10:33')
+        """.replace("\n", " ").strip().lower()
+
+        sql_out = GwBackend.sql_rewrite_timestamp(sql)
+        AssertUtils.assert_sql_equals([sql_expect], [sql_out])
+
     def test_set_kv(self):
         backend = GwBackend(many_catalog_config)
         res, _type = backend.execute_statement("set 'k1'='v1'")
