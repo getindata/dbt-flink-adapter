@@ -20,3 +20,5 @@ twine
 wheel
 requests
 pyyaml
+httpretty
+sqlglot
