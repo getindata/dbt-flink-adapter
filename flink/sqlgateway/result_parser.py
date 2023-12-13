@@ -31,7 +31,7 @@ class SqlGatewayResultParser:
     def parse_result(data: Dict[str, Any]) -> SqlGatewayResult:
         columns = data["results"]["columns"]
         rows: List[Dict[str, Any]] = []
-        next_result_url = data["nextResultUri"]
+        next_result_url = data.get("nextResultUri")
         column_names: List[str] = list(map(lambda c: c["name"], columns))
         is_end_of_steam = data["resultType"] == "EOS"
 

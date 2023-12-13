@@ -51,6 +51,16 @@ class SqlGatewayOperation:
         else:
             raise Exception("SQL gateway error: ", response.status_code)
 
+    def get_errors(self) -> str:
+        response = requests.get(
+            url=f"{self.statement_endpoint_url()}/result/0",
+            headers={
+                "Content-Type": "application/json",
+            },
+        )
+
+        return response.json()["errors"]
+
     def cancel(self) -> str:
         response = requests.post(
             url=f"{self.statement_endpoint_url()}/cancel",
