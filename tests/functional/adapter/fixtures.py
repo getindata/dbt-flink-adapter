@@ -41,6 +41,9 @@ models:
         'scan.startup.mode': 'earliest-offset'
         'value.format': 'json'
         'properties.group.id': 'my-working-group'
+      execution_config:
+        pipeline.name: my_model
+        parallelism.default: 2
     columns:
       - name: id
       - name: name

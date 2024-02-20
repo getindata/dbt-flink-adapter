@@ -13,6 +13,8 @@ class QueryHints:
     fetch_timeout_ms: Optional[int] = None
     mode: Optional[QueryMode] = None
     test_query: bool = False
+    execution_config: Optional[Dict[str, str]] = None
+    drop_statement: Optional[str] = None
 
     def __init__(self, hints=None):
         if hints is None:
@@ -25,6 +27,15 @@ class QueryHints:
             self.mode = QueryMode(hints["mode"].lower())
         if "test_query" in hints:
             self.test_query = bool(hints["test_query"])
+        if "execution_config" in hints:
+            self.execution_config = {}
+            for cfg_item in hints["execution_config"].split(";"):
+                key_val = cfg_item.split("=")
+                if len(key_val) != 2:
+                    raise RuntimeError(f"Improper format of execution config {key_val}")
+                self.execution_config[key_val[0]] = key_val[1]
+        if "drop_statement" in hints:
+            self.drop_statement = hints["drop_statement"]
 
 
 class QueryHintsParser:

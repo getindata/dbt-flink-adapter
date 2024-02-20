@@ -74,7 +74,7 @@ class FlinkConnectionManager(SQLConnectionManager):
             raise dbt.exceptions.RuntimeException(str(e))
 
     @classmethod
-    def open(cls, connection):
+    def open(cls, connection: Connection):
         """
         Receives a connection object and a Credentials object
         and moves it to the "open" state.

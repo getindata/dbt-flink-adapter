@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 from dbt.events import AdapterLogger
 
@@ -9,7 +9,7 @@ logger = AdapterLogger("Flink")
 @dataclass
 class SqlGatewayResult:
     rows: List[Dict[str, Any]]
-    next_result_url: str
+    next_result_url: Optional[str]
     column_names: List[str]
     is_end_of_stream: bool
 
@@ -30,10 +30,10 @@ class SqlGatewayResultParser:
     @staticmethod
     def parse_result(data: Dict[str, Any]) -> SqlGatewayResult:
         columns = data["results"]["columns"]
-        rows: List[Dict[str, Any]] = []
-        next_result_url = data["nextResultUri"]
+        rows: List[Dict[str, Any]] = []        
         column_names: List[str] = list(map(lambda c: c["name"], columns))
         is_end_of_steam = data["resultType"] == "EOS"
+        next_result_url = data.get("nextResultUri", None)
 
         logger.info(f"SQL rows returned: {data['results']['data']}")
         for record in data["results"]["data"]:

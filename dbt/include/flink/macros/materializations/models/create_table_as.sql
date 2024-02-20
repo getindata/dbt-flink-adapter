@@ -23,10 +23,13 @@
   {%- set sql_header = config.get('sql_header', none) -%}
   {% set connector_properties = config.get('default_connector_properties', {}) %}
   {% set _dummy = connector_properties.update(config.get('connector_properties', {})) %}
+  {% set execution_config = config.get('default_execution_config', {}) %}
+  {% set _dummy = execution_config.update(config.get('execution_config', {})) %}
 
   {{ sql_header if sql_header is not none }}
-
-  create {% if temporary: -%}temporary{%- endif %} table
+  {% if execution_config %}/** execution_config('{% for cfg_name in execution_config %}{{cfg_name}}={{execution_config[cfg_name]}}{% if not loop.last %};{% endif %}{% endfor %}') */{% endif %}
+  /** drop_statement('drop {% if temporary: -%}temporary {%- endif %}table if exists {{ this.render() }}') */
+  create {% if temporary: -%}temporary {%- endif %}table
     {{ this.render() }}
     {% if type %}/** mode('{{type}}')*/{% endif %}
   with (
