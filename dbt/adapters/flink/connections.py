@@ -9,7 +9,7 @@ import dbt.exceptions  # noqa
 import yaml
 from dbt.adapters.base import Credentials
 from dbt.adapters.sql import SQLConnectionManager  # type: ignore
-from dbt.contracts.connection import Connection
+from dbt.contracts.connection import Connection, ConnectionState
 from dbt.events import AdapterLogger
 
 from dbt.adapters.flink.handler import FlinkHandler, FlinkCursor
@@ -79,7 +79,7 @@ class FlinkConnectionManager(SQLConnectionManager):
         Receives a connection object and a Credentials object
         and moves it to the "open" state.
         """
-        if connection.state == "open":
+        if connection.state == ConnectionState.OPEN:
             logger.debug("Connection is already open, skipping open.")
             return connection
 
@@ -95,7 +95,7 @@ class FlinkConnectionManager(SQLConnectionManager):
                 logger.info(f"Session created: {session.session_handle}")
                 FlinkConnectionManager._store_session_handle(session)
 
-            connection.state = "open"
+            connection.state = ConnectionState.OPEN
             connection.handle = FlinkHandler(session)
 
         except Exception as e:

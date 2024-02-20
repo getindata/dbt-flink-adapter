@@ -16,10 +16,10 @@ class SqlGatewayOperation:
         self.operation_handle = operation_handle
 
     @staticmethod
-    def execute_statement(session: SqlGatewaySession, sql: str, execution_config: Dict[str, str] = None) -> "SqlGatewayOperation":
-        statement_request = {
-            "executionConfig": execution_config, "statement": sql
-        }
+    def execute_statement(
+        session: SqlGatewaySession, sql: str, execution_config: Dict[str, str] = None
+    ) -> "SqlGatewayOperation":
+        statement_request = {"executionConfig": execution_config, "statement": sql}
 
         response = requests.post(
             url=f"{session.session_endpoint_url()}/statements",

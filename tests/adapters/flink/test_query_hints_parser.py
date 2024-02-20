@@ -29,12 +29,12 @@ class TestQueryHintsParser:
         sql = "select /** test_query('true') */ from input"
         hints = QueryHintsParser.parse(sql)
         assert hints.test_query is True
-        
+
     def test_execution_config(self):
         sql = "/** execution_config('key_a=value_a;key_b=value_b') */ select 1"
         hints = QueryHintsParser.parse(sql)
-        assert hints.execution_config == {'key_a': 'value_a', 'key_b': 'value_b'}
-        
+        assert hints.execution_config == {"key_a": "value_a", "key_b": "value_b"}
+
     def test_drop_statement(self):
         sql = "/** drop_statement('DROP TABLE IF EXISTS TABLE_A') */ CREATE TABLE TABLE_A (id STRING)"
         hints = QueryHintsParser.parse(sql)
