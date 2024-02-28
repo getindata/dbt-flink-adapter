@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+-   Flink upgrade to 1.17 (minimal required version)
+-   Handling execution config.
+-   Job management (stop job with savepoint, initialize with savepoint).
+-   Drop table between restart.
+
 ## [1.3.8] - 2023-02-16
 
 -   Support computed / metadata column

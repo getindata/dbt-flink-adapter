@@ -1,3 +1,4 @@
+from typing import Dict
 from flink.sqlgateway.operation import SqlGatewayOperation
 from flink.sqlgateway.session import SqlGatewaySession
 from flink.sqlgateway.config import SqlGatewayConfig
@@ -10,10 +11,14 @@ class FlinkSqlGatewayClient:
         return SqlGatewaySession.create(config)
 
     @staticmethod
-    def execute_statement(session: SqlGatewaySession, sql: str) -> SqlGatewayOperation:
+    def execute_statement(
+        session: SqlGatewaySession, sql: str, execution_config: Dict[str, str] = None
+    ) -> SqlGatewayOperation:
         if session.session_handle is None:
             raise Exception(
                 f"Session '{session.config.session_name}' is not created. Call create() method first"
             )
 
-        return SqlGatewayOperation.execute_statement(session=session, sql=sql)
+        return SqlGatewayOperation.execute_statement(
+            session=session, sql=sql, execution_config=execution_config
+        )

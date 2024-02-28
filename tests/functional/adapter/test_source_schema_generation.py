@@ -20,10 +20,7 @@ class TestSourceTablesGeneration:
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
-        return {
-            "name": "example",
-            "models": {"+materialized": "view"}
-        }
+        return {"name": "example", "models": {"+materialized": "view"}}
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")

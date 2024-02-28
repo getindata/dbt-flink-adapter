@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import Optional
+from typing import Optional, Dict
 import requests
 from flink.sqlgateway.result_parser import SqlGatewayResult, SqlGatewayResultParser
 from flink.sqlgateway.session import SqlGatewaySession
@@ -16,8 +16,10 @@ class SqlGatewayOperation:
         self.operation_handle = operation_handle
 
     @staticmethod
-    def execute_statement(session: SqlGatewaySession, sql: str) -> "SqlGatewayOperation":
-        statement_request = {"statement": sql}
+    def execute_statement(
+        session: SqlGatewaySession, sql: str, execution_config: Dict[str, str] = None
+    ) -> "SqlGatewayOperation":
+        statement_request = {"executionConfig": execution_config, "statement": sql}
 
         response = requests.post(
             url=f"{session.session_endpoint_url()}/statements",
@@ -26,7 +28,6 @@ class SqlGatewayOperation:
                 "Content-Type": "application/json",
             },
         )
-
         print(f"SQL gateway response: {json.dumps(response.json())}")
 
         if response.status_code == 200:

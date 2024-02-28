@@ -12,10 +12,7 @@ class TestTableMaterialization:
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
-        return {
-            "name": "example",
-            "models": {"+materialized": "table"}
-        }
+        return {"name": "example", "models": {"+materialized": "table"}}
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")

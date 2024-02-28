@@ -3,7 +3,7 @@ import pytest
 from dbt.tests.adapter.basic.test_base import BaseSimpleMaterializations
 from dbt.tests.adapter.basic.test_singular_tests import BaseSingularTests
 from dbt.tests.adapter.basic.test_singular_tests_ephemeral import (
-    BaseSingularTestsEphemeral
+    BaseSingularTestsEphemeral,
 )
 from dbt.tests.adapter.basic.test_empty import BaseEmpty
 from dbt.tests.adapter.basic.test_ephemeral import BaseEphemeral
@@ -32,6 +32,8 @@ class TestSimpleMaterializationsFlink(BaseSimpleMaterializations):
 
 class TestSingularTestsFlink(BaseSingularTests):
     pass
+
+
 #
 #
 # class TestSingularTestsEphemeralFlink(BaseSingularTestsEphemeral):

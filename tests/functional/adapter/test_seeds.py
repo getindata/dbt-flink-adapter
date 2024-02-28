@@ -46,7 +46,8 @@ test_failing_sql = """
 select /** fetch_timeout_ms(10000) */ /** fetch_mode('streaming') */ * from base where id = 10
 """
 
-class TestSeeds():
+
+class TestSeeds:
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
