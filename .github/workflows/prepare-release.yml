@@ -47,7 +47,7 @@ jobs:
           git push
       - name: Open a PR to merge the release to main
         id: open_pr
-        uses: vsoch/pull-request-action@1.0.12
+        uses: vsoch/pull-request-action@1.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST_BRANCH: main
