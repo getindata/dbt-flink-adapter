@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.3.10] - 2024-03-06
+
 -   Handling flink job upgrade_mode (savepoint, stateless)
 
 ## [1.3.9] - 2024-03-06
@@ -28,7 +30,9 @@
 -   Changelog added
 -   Implement handling for dbt test in streaming cases.
 
-[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.9...HEAD
+[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.10...HEAD
+
+[1.3.10]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.9...1.3.10
 
 [1.3.9]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.8...1.3.9
 
