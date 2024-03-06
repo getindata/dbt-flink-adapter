@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.3.9] - 2024-03-06
+
 -   Flink upgrade to 1.17 (minimal required version)
 -   Handling execution config.
 -   Job management (stop job with savepoint, initialize with savepoint).
@@ -24,7 +26,9 @@
 -   Changelog added
 -   Implement handling for dbt test in streaming cases.
 
-[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.8...HEAD
+[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.9...HEAD
+
+[1.3.9]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.8...1.3.9
 
 [1.3.8]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.7...1.3.8
 
