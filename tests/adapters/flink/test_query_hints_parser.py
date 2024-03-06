@@ -39,6 +39,11 @@ class TestQueryHintsParser:
         sql = "/** drop_statement('DROP TABLE IF EXISTS TABLE_A') */ CREATE TABLE TABLE_A (id STRING)"
         hints = QueryHintsParser.parse(sql)
         assert hints.drop_statement == "DROP TABLE IF EXISTS TABLE_A"
+        
+    def test_upgrade_mode(self):
+        sql = "/** upgrade_mode('savepoint') */ CREATE TABLE TABLE_X (id String) AS SELECT * FROM Y"
+        hints = QueryHintsParser.parse(sql)
+        assert hints.upgrade_mode == "savepoint"
 
     def test_multiple_hints_in_single_comment(self):
         sql = "select /** fetch_max(10) fetch_timeout_ms(1000) */ from input"

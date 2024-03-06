@@ -94,4 +94,4 @@ class SqlGatewayOperation:
         if response.status_code == 200:
             return SqlGatewayResultParser.parse_result(response.json())
         else:
-            raise Exception("SQL gateway error: ", response.reason)
+            raise Exception("SQL gateway error: ", response.json())

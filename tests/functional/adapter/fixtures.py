@@ -44,6 +44,7 @@ models:
       execution_config:
         pipeline.name: my_model
         parallelism.default: 2
+      upgrade_mode: savepoint
     columns:
       - name: id
       - name: name

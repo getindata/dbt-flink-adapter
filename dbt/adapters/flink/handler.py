@@ -106,17 +106,20 @@ class FlinkCursor:
         start_from_savepoint = False
         if execution_config:
             if not self.last_query_hints.test_query:
-                savepoint_path = FlinkJobManager(self.session).stop_job(execution_config)
+                with_savepoint = self.last_query_hints.upgrade_mode == "savepoint"
+                savepoint_path = FlinkJobManager(self.session).stop_job(
+                    execution_config, with_savepoint
+                )
                 if savepoint_path:
-                    logger.info("f: {}", savepoint_path)
+                    logger.debug("Savepoint path {}", savepoint_path)
                     execution_config[ExecutionConfig.SAVEPOINT_PATH] = savepoint_path
                     start_from_savepoint = True
             if not start_from_savepoint:
-                logger.info("Job starting without savepoint")
+                logger.debug("Job starting without savepoint")
                 execution_config.pop(ExecutionConfig.SAVEPOINT_PATH, None)
 
         if self.last_query_hints.drop_statement:
-            logger.info("Executing drop statement: {}", self.last_query_hints.drop_statement)
+            logger.debug("Executing drop statement: {}", self.last_query_hints.drop_statement)
             FlinkCursor(self.session).execute(self.last_query_hints.drop_statement)
 
         self._set_query_mode()
@@ -131,7 +134,7 @@ class FlinkCursor:
             operation_handle.operation_handle,
         )
         if status == "ERROR":
-            raise Exception("Statement execution failed")
+            operation_handle.get_result()  # throw exception
         self.last_query_start_time = self._get_current_timestamp()
         self.last_operation = operation_handle
 
@@ -163,7 +166,7 @@ class FlinkCursor:
             self.result_buffer.append(tuple(record.values()))
             if self._buffered_fetch_max():
                 break
-        logger.info(f"Buffered: {len(result.rows)} rows")
+        logger.debug(f"Buffered: {len(result.rows)} rows")
         self.last_result = result
 
     @staticmethod
@@ -219,11 +222,11 @@ class FlinkJobManager:
         if ExecutionConfig.JOB_NAME not in execution_config:
             return None
         job_name = execution_config[ExecutionConfig.JOB_NAME]
-        logger.info("Getting job by name {}", job_name)
+        logger.debug("Getting job by name {}", job_name)
         job_id = self._get_job_id(job_name)
         if job_id:
             state_path = execution_config.get(ExecutionConfig.STATE_PATH)
-            logger.info("Stopping job {} using path {}", job_id, state_path)
+            logger.debug("Stopping job {}, state path {}", job_id, state_path)
             path = self._do_stop_job(job_id, with_savepoint, state_path)
             logger.info("Job stopped {}", job_id)
             return path
@@ -237,7 +240,9 @@ class FlinkJobManager:
         savepoint_statement = " WITH SAVEPOINT" if with_savepoint else ""
         cursor.execute(f"{hints} STOP JOB '{job_id}'{savepoint_statement}")
         for result in cursor.fetchall():
-            return result[0]
+            logger.debug("STOP JOB RESULT: {}", result)
+            if with_savepoint:
+                return result[0]
         return None
 
     def _get_job_id(self, job_name: str) -> Optional[str]:
