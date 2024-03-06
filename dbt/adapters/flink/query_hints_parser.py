@@ -36,6 +36,8 @@ class QueryHints:
                 self.execution_config[key_val[0]] = key_val[1]
         if "drop_statement" in hints:
             self.drop_statement = hints["drop_statement"]
+        if "upgrade_mode" in hints:
+            self.upgrade_mode = hints["upgrade_mode"]
 
 
 class QueryHintsParser:

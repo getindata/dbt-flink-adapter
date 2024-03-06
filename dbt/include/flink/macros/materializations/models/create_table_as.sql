@@ -25,8 +25,10 @@
   {% set _dummy = connector_properties.update(config.get('connector_properties', {})) %}
   {% set execution_config = config.get('default_execution_config', {}) %}
   {% set _dummy = execution_config.update(config.get('execution_config', {})) %}
+  {% set upgrade_mode = config.get('upgrade_mode', 'stateless') %}
 
   {{ sql_header if sql_header is not none }}
+  /** upgrade_mode('{{upgrade_mode}}') */
   {% if execution_config %}/** execution_config('{% for cfg_name in execution_config %}{{cfg_name}}={{execution_config[cfg_name]}}{% if not loop.last %};{% endif %}{% endfor %}') */{% endif %}
   /** drop_statement('drop {% if temporary: -%}temporary {%- endif %}table if exists {{ this.render() }}') */
   create {% if temporary: -%}temporary {%- endif %}table

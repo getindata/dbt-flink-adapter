@@ -106,9 +106,12 @@ class FlinkCursor:
         start_from_savepoint = False
         if execution_config:
             if not self.last_query_hints.test_query:
-                savepoint_path = FlinkJobManager(self.session).stop_job(execution_config)
+                with_savepoint = self.last_query_hints.upgrade_mode == "savepoint"
+                savepoint_path = FlinkJobManager(self.session).stop_job(
+                    execution_config, with_savepoint
+                )
                 if savepoint_path:
-                    logger.info("f: {}", savepoint_path)
+                    logger.info("Savepoint path {}", savepoint_path)
                     execution_config[ExecutionConfig.SAVEPOINT_PATH] = savepoint_path
                     start_from_savepoint = True
             if not start_from_savepoint:
@@ -131,7 +134,7 @@ class FlinkCursor:
             operation_handle.operation_handle,
         )
         if status == "ERROR":
-            raise Exception("Statement execution failed")
+            operation_handle.get_result()  # throw exception
         self.last_query_start_time = self._get_current_timestamp()
         self.last_operation = operation_handle
 
@@ -223,7 +226,7 @@ class FlinkJobManager:
         job_id = self._get_job_id(job_name)
         if job_id:
             state_path = execution_config.get(ExecutionConfig.STATE_PATH)
-            logger.info("Stopping job {} using path {}", job_id, state_path)
+            logger.info("Stopping job {}, state path {}", job_id, state_path)
             path = self._do_stop_job(job_id, with_savepoint, state_path)
             logger.info("Job stopped {}", job_id)
             return path
@@ -237,7 +240,9 @@ class FlinkJobManager:
         savepoint_statement = " WITH SAVEPOINT" if with_savepoint else ""
         cursor.execute(f"{hints} STOP JOB '{job_id}'{savepoint_statement}")
         for result in cursor.fetchall():
-            return result[0]
+            logger.info("STOP JOB RESULT: {}", result)
+            if with_savepoint:
+                return result[0]
         return None
 
     def _get_job_id(self, job_name: str) -> Optional[str]:

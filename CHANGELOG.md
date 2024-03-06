@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+-   Handling flink job upgrade_mode (savepoint, stateless)
+
 ## [1.3.9] - 2024-03-06
 
 -   Flink upgrade to 1.17 (minimal required version)
