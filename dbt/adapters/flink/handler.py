@@ -9,6 +9,8 @@ from dbt.adapters.flink.query_hints_parser import (
     QueryHints,
     QueryHintsParser,
     QueryMode,
+    UpgradeMode,
+    JobState,
 )
 
 from flink.sqlgateway.client import FlinkSqlGatewayClient
@@ -103,24 +105,23 @@ class FlinkCursor:
             sql = sql.format(*[self._convert_binding(binding) for binding in bindings])
         self.last_query_hints: QueryHints = QueryHintsParser.parse(sql)
         execution_config = self.last_query_hints.execution_config
-        start_from_savepoint = False
         if execution_config:
             if not self.last_query_hints.test_query:
-                with_savepoint = self.last_query_hints.upgrade_mode == "savepoint"
+                with_savepoint = self.last_query_hints.upgrade_mode == UpgradeMode.SAVEPOINT
                 savepoint_path = FlinkJobManager(self.session).stop_job(
                     execution_config, with_savepoint
                 )
                 if savepoint_path:
                     logger.debug("Savepoint path {}", savepoint_path)
                     execution_config[ExecutionConfig.SAVEPOINT_PATH] = savepoint_path
-                    start_from_savepoint = True
-            if not start_from_savepoint:
-                logger.debug("Job starting without savepoint")
-                execution_config.pop(ExecutionConfig.SAVEPOINT_PATH, None)
 
         if self.last_query_hints.drop_statement:
             logger.debug("Executing drop statement: {}", self.last_query_hints.drop_statement)
             FlinkCursor(self.session).execute(self.last_query_hints.drop_statement)
+
+        if JobState.SUSPENDED == self.last_query_hints.job_state:
+            logger.info("Job suspended")
+            return
 
         self._set_query_mode()
         logger.info("Executing statement:\n{}\nExecution config:\n{}", sql, execution_config)

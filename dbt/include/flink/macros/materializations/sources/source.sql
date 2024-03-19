@@ -7,7 +7,7 @@
 {% set watermark_properties = node.config.get('watermark') %}
 {% set type = node.config.get('type', None) %}
 {% set table_column_ids = node.columns.keys() %}
-/** drop_statement('DROP TABLE IF EXISTS {{ node.identifier }}') */
+/** drop_statement('DROP TABLE IF EXISTS `{{ node.identifier }}`') */
 CREATE TABLE {{ node.identifier }} {% if type %}/** mode('{{type}}')*/{% endif %} (
 {% for column_id in table_column_ids %}
     {%- if node.columns[column_id]["column_type"] == 'metadata' %} `{{ node.columns[column_id]["name"] }}` {{ node.columns[column_id]["data_type"] }} METADATA {% if node.columns[column_id]["expression"] %} FROM '{{node.columns[column_id]["expression"]}}' {% endif %}

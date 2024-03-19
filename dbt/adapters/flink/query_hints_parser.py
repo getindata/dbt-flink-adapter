@@ -8,6 +8,16 @@ class QueryMode(Enum):
     STREAMING = "streaming"
 
 
+class UpgradeMode(Enum):
+    SAVEPOINT = "savepoint"
+    STATELESS = "stateless"
+
+
+class JobState(Enum):
+    RUNNING = "running"
+    SUSPENDED = "suspended"
+
+
 class QueryHints:
     fetch_max: Optional[int] = None
     fetch_timeout_ms: Optional[int] = None
@@ -36,8 +46,10 @@ class QueryHints:
                 self.execution_config[key_val[0]] = key_val[1]
         if "drop_statement" in hints:
             self.drop_statement = hints["drop_statement"]
-        if "upgrade_mode" in hints:
-            self.upgrade_mode = hints["upgrade_mode"]
+        self.upgrade_mode = UpgradeMode(
+            hints.get("upgrade_mode", UpgradeMode.STATELESS.value).lower()
+        )
+        self.job_state = JobState(hints.get("job_state", JobState.RUNNING.value).lower())
 
 
 class QueryHintsParser:
