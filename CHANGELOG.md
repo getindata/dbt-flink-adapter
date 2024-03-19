@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+-   Handling job_state (running, suspended)
+
 ## [1.3.10] - 2024-03-06
 
 -   Handling flink job upgrade_mode (savepoint, stateless)
