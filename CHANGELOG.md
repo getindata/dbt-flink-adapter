@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.3.11] - 2024-03-19
+
 -   Handling job_state (running, suspended)
 
 ## [1.3.10] - 2024-03-06
@@ -32,7 +34,9 @@
 -   Changelog added
 -   Implement handling for dbt test in streaming cases.
 
-[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.10...HEAD
+[Unreleased]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.11...HEAD
+
+[1.3.11]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.10...1.3.11
 
 [1.3.10]: https://github.com/getindata/dbt-flink-adapter/compare/1.3.9...1.3.10
 
