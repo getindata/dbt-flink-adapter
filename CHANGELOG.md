@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+-   Enhance `gateway_url` to auto-detect HTTPS protocol when port is 443
+
 ## [1.3.11] - 2024-03-19
 
 -   Handling job_state (running, suspended)
