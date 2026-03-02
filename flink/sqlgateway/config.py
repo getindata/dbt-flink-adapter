@@ -13,4 +13,5 @@ class SqlGatewayConfig:
         self.session_name = session_name
 
     def gateway_url(self) -> str:
-        return f"http://{self.host}:{self.port}"
+        protocol = "https" if self.port == 443 else "http"
+        return f"{protocol}://{self.host}:{self.port}"
