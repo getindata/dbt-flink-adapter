@@ -2,7 +2,7 @@ from datetime import datetime
 from time import sleep
 from typing import Dict, Sequence, Tuple, Optional, Any, List
 
-from dbt.events import AdapterLogger
+from dbt.adapters.events.logging import AdapterLogger
 
 from dbt.adapters.flink.constants import ExecutionConfig
 from dbt.adapters.flink.query_hints_parser import (
@@ -29,6 +29,7 @@ class FlinkCursor:
     last_result: Optional[SqlGatewayResult] = None
     last_query_hints: QueryHints = QueryHints()
     last_query_start_time: Optional[float] = None
+    statement_set_queries: Dict[str, List[str]] = {}
 
     def __init__(self, session):
         logger.info("Creating new cursor for session {}".format(session))
@@ -104,6 +105,9 @@ class FlinkCursor:
         if bindings is not None:
             sql = sql.format(*[self._convert_binding(binding) for binding in bindings])
         self.last_query_hints: QueryHints = QueryHintsParser.parse(sql)
+        if self.last_query_hints.statement_set_group is not None:
+            self._execute_statement_set(sql)
+            return
         execution_config = self.last_query_hints.execution_config
         if execution_config:
             if not self.last_query_hints.test_query:
@@ -138,6 +142,99 @@ class FlinkCursor:
             operation_handle.get_result()  # throw exception
         self.last_query_start_time = self._get_current_timestamp()
         self.last_operation = operation_handle
+
+    def _execute_statement_set(self, sql: str) -> None:
+        create_sql, insert_sql = self._extract_statement_set_parts(sql)
+        if self.last_query_hints.drop_statement:
+            logger.debug("Executing drop statement: {}", self.last_query_hints.drop_statement)
+            FlinkCursor(self.session).execute(self.last_query_hints.drop_statement)
+
+        self._set_query_mode()
+        logger.info("Executing statement set pre-create statement:\n{}", create_sql)
+        create_operation = FlinkSqlGatewayClient.execute_statement(self.session, create_sql)
+        create_status = self._wait_till_finished(create_operation)
+        logger.info(
+            "Statement set pre-create executed. Status {}, operation handle: {}",
+            create_status,
+            create_operation.operation_handle,
+        )
+        if create_status == "ERROR":
+            create_operation.get_result()  # throw exception
+
+        group_name = self.last_query_hints.statement_set_group
+        if group_name is None:
+            raise RuntimeError("statement_set_group is required for statement set execution")
+
+        if group_name not in self.statement_set_queries:
+            self.statement_set_queries[group_name] = []
+        self.statement_set_queries[group_name].append(insert_sql)
+
+        if not self.last_query_hints.statement_set_leader:
+            self.last_query_start_time = self._get_current_timestamp()
+            self.last_operation = create_operation
+            return
+
+        execution_config = self.last_query_hints.execution_config
+        if execution_config and not self.last_query_hints.test_query:
+            with_savepoint = self.last_query_hints.upgrade_mode == UpgradeMode.SAVEPOINT
+            savepoint_path = FlinkJobManager(self.session).stop_job(execution_config, with_savepoint)
+            if savepoint_path:
+                logger.debug("Savepoint path {}", savepoint_path)
+                execution_config[ExecutionConfig.SAVEPOINT_PATH] = savepoint_path
+
+        if JobState.SUSPENDED == self.last_query_hints.job_state:
+            logger.info("Job suspended")
+            self.last_query_start_time = self._get_current_timestamp()
+            self.last_operation = create_operation
+            return
+
+        self._set_query_mode()
+        statement_set_sql = self._build_statement_set_sql(self.statement_set_queries[group_name])
+        logger.info("Executing statement set SQL:\n{}", statement_set_sql)
+        operation_handle = FlinkSqlGatewayClient.execute_statement(
+            self.session, statement_set_sql, execution_config
+        )
+        status = self._wait_till_finished(operation_handle)
+        logger.info(
+            "Statement set executed. Status {}, operation handle: {}",
+            status,
+            operation_handle.operation_handle,
+        )
+        if status == "ERROR":
+            operation_handle.get_result()  # throw exception
+
+        self.statement_set_queries[group_name] = []
+        self.last_query_start_time = self._get_current_timestamp()
+        self.last_operation = operation_handle
+
+    @staticmethod
+    def _extract_statement_set_parts(sql: str) -> Tuple[str, str]:
+        create_marker = "/** statement_set_create */"
+        insert_marker = "/** statement_set_insert */"
+        create_idx = sql.find(create_marker)
+        insert_idx = sql.find(insert_marker)
+        if create_idx < 0 or insert_idx < 0 or create_idx >= insert_idx:
+            raise RuntimeError(
+                "statement_set SQL must contain markers /** statement_set_create */ and "
+                "/** statement_set_insert */ in order"
+            )
+
+        create_start_idx = create_idx + len(create_marker)
+        create_sql = sql[create_start_idx:insert_idx].strip()
+        insert_sql = sql[insert_idx + len(insert_marker) :].strip()
+        if not insert_sql.endswith(";"):
+            insert_sql = f"{insert_sql};"
+        return create_sql, insert_sql
+
+    @staticmethod
+    def _build_statement_set_sql(insert_statements: List[str]) -> str:
+        normalized_statements = []
+        for statement in insert_statements:
+            normalized = statement.strip()
+            if not normalized.endswith(";"):
+                normalized = f"{normalized};"
+            normalized_statements.append(normalized)
+        return "EXECUTE STATEMENT SET\nBEGIN\n{}\nEND;".format("\n".join(normalized_statements))
 
     def _convert_binding(self, binding):
         if isinstance(binding, str):

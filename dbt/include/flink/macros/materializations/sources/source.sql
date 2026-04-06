@@ -1,12 +1,15 @@
 {% macro create_sources() %}
 {% if execute %}
 {% for node in graph.sources.values() -%}
-{% set flink_source_sql %}
 {% set connector_properties = node.config.get('default_connector_properties', {}) %}
 {% set _dummy = connector_properties.update(node.config.get('connector_properties', {})) %}
 {% set watermark_properties = node.config.get('watermark') %}
 {% set type = node.config.get('type', None) %}
 {% set table_column_ids = node.columns.keys() %}
+{% if table_column_ids | length == 0 or connector_properties | length == 0 %}
+  {{ log("Skipping source " ~ node.identifier ~ ": missing columns or connector_properties", info=True) }}
+{% else %}
+{% set flink_source_sql %}
 /** drop_statement('DROP TABLE IF EXISTS `{{ node.identifier }}`') */
 CREATE TABLE {{ node.identifier }} {% if type %}/** mode('{{type}}')*/{% endif %} (
 {% for column_id in table_column_ids %}
@@ -26,6 +29,7 @@ with (
 {{ log("Source " ~ node.identifier ~ " creation ... ") }}
 {% set source_creation_results = run_query(flink_source_sql) %}
 {{ log("Source " ~ node.identifier ~ " creation result " ~ source_creation_results) }}
+{% endif %}
 {%- endfor %}
 {% endif %}
 {% endmacro %}

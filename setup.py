@@ -3,10 +3,10 @@ import os
 import sys
 import re
 
-# require python 3.7 or newer
-if sys.version_info < (3, 7):
+# require python 3.12 or newer
+if sys.version_info < (3, 12):
     print("Error: dbt does not support this version of Python.")
-    print("Please upgrade to Python 3.7 or higher.")
+    print("Please upgrade to Python 3.12 or higher.")
     sys.exit(1)
 
 
@@ -50,7 +50,7 @@ def _get_dbt_core_version():
 
 
 package_name = "dbt-flink-adapter"
-package_version = "1.3.11"
+package_version = "1.11.0"
 # make sure this always matches dbt/adapters/{adapter}/__version__.py
 dbt_core_version = _get_dbt_core_version()
 description = """The Flink adapter plugin for dbt"""
@@ -70,6 +70,11 @@ setup(
         "dbt-core~={}".format(dbt_core_version),
         "requests<3.0.0",
     ],
+    entry_points={
+        "dbt.adapters": [
+            "flink = dbt.adapters.flink:Plugin",
+        ],
+    },
     zip_safe=False,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -77,10 +82,7 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.12",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.12",
 )

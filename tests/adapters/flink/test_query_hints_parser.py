@@ -78,3 +78,9 @@ class TestQueryHintsParser:
         assert hints.fetch_timeout_ms is None
         assert hints.fetch_max == 10
         assert hints.mode == QueryMode.STREAMING
+
+    def test_statement_set_hints(self):
+        sql = "/** statement_set_group('daily_job') statement_set_leader('true') */ INSERT INTO sink SELECT * FROM src"
+        hints = QueryHintsParser.parse(sql)
+        assert hints.statement_set_group == "daily_job"
+        assert hints.statement_set_leader is True

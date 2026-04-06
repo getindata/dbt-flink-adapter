@@ -12,7 +12,15 @@ class TestTableMaterialization:
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
-        return {"name": "example", "models": {"+materialized": "table"}}
+        return {
+            "name": "example",
+            "models": {"+materialized": "table"},
+            "on-run-start": [
+                "drop view if exists `my_model`",
+                "drop table if exists `my_model`",
+                "{{ create_sources() }}",
+            ],
+        }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
@@ -26,4 +34,5 @@ class TestTableMaterialization:
     def test_materialize_tables(self, project):
         # run models
         results = run_dbt(["run"])
-        assert len(results) == 1
+        model_results = [r for r in results if getattr(r.node, "resource_type", None) == "model"]
+        assert len(model_results) == 1

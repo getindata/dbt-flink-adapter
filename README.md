@@ -1,6 +1,6 @@
 # dbt Flink Adapter
 
-[![Python Version](https://img.shields.io/badge/python-3.8-blue.svg)](https://github.com/getindata/dbt-flink-adapter)
+[![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://github.com/getindata/dbt-flink-adapter)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![SemVer](https://img.shields.io/badge/semver-2.0.0-green)](https://semver.org/)
 [![PyPI version](https://badge.fury.io/py/dbt-flink-adapter.svg)](https://badge.fury.io/py/dbt-flink-adapter)
@@ -13,7 +13,7 @@ Check out our [blogpost about dbt-flink-adapter with tutorial](https://getindata
 ## Prerequisites
 
 * Flink 1.16+ with Flink SQL Gateway
-* Python 3.8+ with pip
+* Python 3.12+ with pip
 * (Optionally) venv
 
 ## Setup
@@ -149,6 +149,100 @@ CREATE TABLE IF NOT EXISTS my_source (
 
 This adapter currently supports two types of materialization *table* and *view*. Because in Flink table has to be
 associated with a connector `type` and `connector_properties` have to be provided similar like in case of defining sources.
+
+#### Run multiple models in one Flink job (STATEMENT SET)
+
+You can group multiple `table` models into one Flink job by using:
+- `statement_set_group`: group name shared by all models in one job
+- `statement_set_leader`: set to `true` only on the last model in that group
+
+When `statement_set_group` is set, adapter will:
+1. Create sink tables for each model.
+2. Accumulate model `INSERT` statements in memory.
+3. Execute a single `EXECUTE STATEMENT SET ...` when leader model is reached.
+
+`models.yml`
+
+```yaml
+models:
+  - name: orders_sink
+    config:
+      materialized: table
+      type: streaming
+      connector_properties:
+        connector: 'kafka'
+        properties.bootstrap.servers: 'kafka:29092'
+        topic: 'orders_sink'
+        scan.startup.mode: 'earliest-offset'
+        value.format: 'json'
+        properties.group.id: 'my-working-group'
+      statement_set_group: 'orders_job'
+      statement_set_leader: false
+    columns:
+      - name: id
+        data_type: STRING
+      - name: payload
+        data_type: STRING
+
+  - name: payments_sink
+    config:
+      materialized: table
+      type: streaming
+      connector_properties:
+        connector: 'kafka'
+        properties.bootstrap.servers: 'kafka:29092'
+        topic: 'payments_sink'
+        scan.startup.mode: 'earliest-offset'
+        value.format: 'json'
+        properties.group.id: 'my-working-group'
+      statement_set_group: 'orders_job'
+      statement_set_leader: true
+      execution_config:
+        pipeline.name: orders_job
+        parallelism.default: 2
+    columns:
+      - name: id
+        data_type: STRING
+      - name: payload
+        data_type: STRING
+```
+
+Run grouped models together:
+
+```shell
+dbt run --select orders_sink payments_sink
+```
+
+#### Persist docs to Flink comments
+
+You can persist model and column descriptions as Flink `COMMENT` metadata:
+
+`dbt_project.yml`
+
+```yaml
+models:
+  example1:
+    +persist_docs:
+      relation: true
+      columns: true
+```
+
+`models.yml`
+
+```yaml
+models:
+  - name: orders_sink
+    description: "Orders sink table"
+    columns:
+      - name: id
+        data_type: STRING
+        description: "Business order identifier"
+      - name: payload
+        data_type: STRING
+        description: "JSON payload from source stream"
+```
+
+`dbt-flink-adapter` renders these descriptions into table/column `COMMENT` clauses during table creation.
 
 #### Example
 

@@ -25,6 +25,8 @@ class QueryHints:
     test_query: bool = False
     execution_config: Optional[Dict[str, str]] = None
     drop_statement: Optional[str] = None
+    statement_set_group: Optional[str] = None
+    statement_set_leader: bool = False
 
     def __init__(self, hints=None):
         if hints is None:
@@ -46,6 +48,10 @@ class QueryHints:
                 self.execution_config[key_val[0]] = key_val[1]
         if "drop_statement" in hints:
             self.drop_statement = hints["drop_statement"]
+        if "statement_set_group" in hints:
+            self.statement_set_group = hints["statement_set_group"]
+        if "statement_set_leader" in hints:
+            self.statement_set_leader = hints["statement_set_leader"].lower() == "true"
         self.upgrade_mode = UpgradeMode(
             hints.get("upgrade_mode", UpgradeMode.STATELESS.value).lower()
         )

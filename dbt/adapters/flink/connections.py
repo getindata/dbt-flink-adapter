@@ -5,12 +5,16 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional, Any, Tuple
 
-import dbt.exceptions  # noqa
 import yaml
-from dbt.adapters.base import Credentials
+from dbt.adapters.contracts.connection import (
+    AdapterResponse,
+    Connection,
+    ConnectionState,
+    Credentials,
+)
+from dbt.adapters.events.logging import AdapterLogger
 from dbt.adapters.sql import SQLConnectionManager  # type: ignore
-from dbt.contracts.connection import Connection, ConnectionState
-from dbt.events import AdapterLogger
+from dbt_common.exceptions import DbtRuntimeError
 
 from dbt.adapters.flink.handler import FlinkHandler, FlinkCursor
 from flink.sqlgateway.client import FlinkSqlGatewayClient
@@ -53,7 +57,7 @@ class FlinkCredentials(Credentials):
         """
         List of keys to display in the `dbt debug` output.
         """
-        return "host", "port", "session_name"
+        return "database", "schema", "host", "port", "session_name"
 
 
 class FlinkConnectionManager(SQLConnectionManager):
@@ -71,7 +75,7 @@ class FlinkConnectionManager(SQLConnectionManager):
             yield
         except Exception as e:
             logger.error("Exception thrown during execution: {}".format(str(e)))
-            raise dbt.exceptions.RuntimeException(str(e))
+            raise DbtRuntimeError(str(e))
 
     @classmethod
     def open(cls, connection: Connection):
@@ -135,6 +139,7 @@ class FlinkConnectionManager(SQLConnectionManager):
             "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
             "session_handle": session.session_handle,
         }
+        os.makedirs(os.path.dirname(SESSION_FILE_PATH), exist_ok=True)
         with open(SESSION_FILE_PATH, "w+") as file:
             yaml.dump(content, file)
 
@@ -146,7 +151,11 @@ class FlinkConnectionManager(SQLConnectionManager):
         that has items such as code, rows_affected,etc. can also just be a string ex. "OK"
         if your cursor does not offer rich metadata.
         """
-        return cursor.get_status()
+        status = cursor.get_status()
+        query_id = None
+        if cursor.last_operation is not None:
+            query_id = cursor.last_operation.operation_handle
+        return AdapterResponse(_message=status, code=status, query_id=query_id)
 
     def cancel(self, connection):
         """

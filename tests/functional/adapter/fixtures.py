@@ -32,6 +32,7 @@ version: 2
 models:
   - name: my_model
     config:
+      type: streaming
       database: my_model_database
       schema: my_model_schema
       connector_properties:
@@ -57,6 +58,7 @@ sources:
     tables:
       - name: input_topic
         config:
+          type: streaming
           connector_properties:
             connector: 'kafka'
             'properties.bootstrap.servers': 'kafka:29092'
@@ -73,6 +75,7 @@ sources:
             data_type: STRING
       - name: output_topic
         config:
+          type: streaming
           connector_properties:
             connector: 'kafka'
             'properties.bootstrap.servers': 'kafka:29092'

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Any, Optional
 
-from dbt.events import AdapterLogger
+from dbt.adapters.events.logging import AdapterLogger
 
 logger = AdapterLogger("Flink")
 
